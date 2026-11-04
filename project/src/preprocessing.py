@@ -1,109 +1,90 @@
-"""Tiền xử lý dữ liệu bán lẻ: giá trị thiếu, hóa đơn hủy và ngoại lai.
+"""Tiền xử lý Online Retail II cho bài toán phân cụm khách hàng RFM.
 
-Các quy tắc ở đây được rút ra từ notebook `notebooks/01_eda/preprocessing_v1.ipynb`
-(xem phần "Đề xuất phương án xử lý"). Dữ liệu gốc không bị sửa; mọi hàm trả về
-bản sao mới.
+Các quy tắc và lý do chọn được giải thích trong
+`notebooks/01_eda/preprocessing_v1.ipynb` (mục 5 và 6). Dữ liệu gốc không bị sửa.
 """
 from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import pandas as pd
 
 RAW_PATH = Path("data/raw/online_retail_II.xlsx")
 PROCESSED_DIR = Path("data/processed")
 
 # Mã hàng không phải sản phẩm (phí, bưu phí, điều chỉnh sổ sách, hàng thử...).
-SERVICE_CODES = {
+SPECIAL_CODES = {
     "POST", "DOT", "M", "C2", "C3", "D", "S", "B", "BANK CHARGES",
     "ADJUST", "ADJUST2", "AMAZONFEE", "CRUK", "TEST001", "TEST002",
 }
+OUTLIER_COLS = ["Quantity", "Price"]
+OUTLIER_K = 3.0  # hệ số IQR (ngoại lai "cực đoan"), áp dụng trên thang log1p
 
 
 def load_raw(path: Path | str = RAW_PATH) -> pd.DataFrame:
-    """Đọc và gộp các sheet của Online Retail II, thêm cột `Sheet` để truy vết."""
+    """Đọc cả 2 sheet của file Excel rồi gộp lại."""
     sheets = pd.read_excel(path, sheet_name=None, engine="openpyxl")
-    return pd.concat(
-        [frame.assign(Sheet=name) for name, frame in sheets.items()],
-        ignore_index=True,
-    )
+    return pd.concat(sheets.values(), ignore_index=True)
 
 
-def standardize(df: pd.DataFrame) -> pd.DataFrame:
-    """Chuẩn hóa chuỗi: bỏ khoảng trắng, viết hoa mã hàng, đổi tên cột."""
-    out = df.copy()
-    out["Invoice"] = out["Invoice"].astype(str).str.strip().str.upper()
-    out["StockCode"] = out["StockCode"].astype(str).str.strip().str.upper()
-    out["Description"] = out["Description"].astype("string").str.strip()
-    out["Country"] = out["Country"].astype("string").str.strip()
-    return out.rename(columns={"Customer ID": "CustomerID"})
+def outlier_mask(df: pd.DataFrame, cols=OUTLIER_COLS, k: float = OUTLIER_K) -> pd.Series:
+    """Đánh dấu dòng có ít nhất một cột nằm ngoài [Q1 - k*IQR, Q3 + k*IQR] trên thang log1p."""
+    mask = pd.Series(False, index=df.index)
+    for col in cols:
+        x = np.log1p(df[col])
+        q1, q3 = x.quantile([0.25, 0.75])
+        iqr = q3 - q1
+        mask |= (x < q1 - k * iqr) | (x > q3 + k * iqr)
+    return mask
 
 
-def reversed_sale_mask(sales: pd.DataFrame, cancels: pd.DataFrame) -> pd.Series:
-    """Đánh dấu dòng bán đã bị hủy nguyên vẹn (cùng khách, mã hàng, số lượng, đơn giá).
+def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Làm sạch toàn bộ dữ liệu. Trả về `(clean, log_df)`."""
+    log: list[tuple[str, int]] = [("Dữ liệu gốc (đã gộp 2 sheet)", len(raw))]
+    df = raw.copy()
 
-    Khớp theo từng cặp một: mỗi dòng hủy chỉ "triệt tiêu" tối đa một dòng bán
-    xảy ra trước nó.
-    """
-    key = ["CustomerID", "StockCode", "Price"]
-    s = sales[key + ["Quantity", "InvoiceDate"]].copy()
-    c = cancels[key + ["Quantity", "InvoiceDate"]].copy()
-    c["Quantity"] = -c["Quantity"]
-    s["rank"] = s.groupby(key + ["Quantity"]).cumcount()
-    c["rank"] = c.groupby(key + ["Quantity"]).cumcount()
-    merged = s.reset_index().merge(
-        c, on=key + ["Quantity", "rank"], how="left", suffixes=("", "_cancel")
-    )
-    hit = merged["InvoiceDate_cancel"].notna() & (
-        merged["InvoiceDate_cancel"] >= merged["InvoiceDate"]
-    )
-    return pd.Series(hit.to_numpy(), index=merged["index"]).reindex(sales.index).fillna(False)
+    # Bước 1: điền Description thiếu + chuẩn hóa văn bản
+    df["Description"] = df["Description"].fillna("Unknown Product")
+    df["Description"] = df["Description"].astype(str).str.strip().str.upper()
+    df["Invoice"] = df["Invoice"].astype(str).str.strip().str.upper()
+    df["StockCode"] = df["StockCode"].astype(str).str.strip().str.upper()
+    df["Country"] = df["Country"].astype(str).str.strip().replace({"EIRE": "Ireland"})
+    log.append(("Bước 1. Điền Description thiếu, chuẩn hóa văn bản, EIRE → Ireland", len(df)))
 
+    # Bước 2: dòng trùng
+    df = df.drop_duplicates()
+    log.append(("Bước 2. Bỏ dòng trùng lặp", len(df)))
 
-def clean_transactions(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Áp dụng toàn bộ quy tắc tiền xử lý.
+    # Bước 3: hóa đơn hủy, Quantity/Price không dương, mã hàng đặc biệt
+    df = df[~df["Invoice"].str.startswith("C")]
+    log.append(("Bước 3a. Bỏ hóa đơn hủy (Invoice bắt đầu bằng C)", len(df)))
+    df = df[(df["Quantity"] > 0) & (df["Price"] > 0)]
+    log.append(("Bước 3b. Giữ Quantity > 0 và Price > 0", len(df)))
+    df = df[~df["StockCode"].isin(SPECIAL_CODES)]
+    log.append(("Bước 3c. Bỏ mã hàng đặc biệt (POST, M, BANK CHARGES...)", len(df)))
 
-    Trả về `(sales, cancellations, log)`:
-    - `sales`: dòng bán hợp lệ có mã khách hàng (đầu vào cho RFM);
-    - `cancellations`: dòng hóa đơn hủy có mã khách hàng (dùng cho đặc trưng hoàn trả);
-    - `log`: số dòng bị loại ở từng bước.
-    """
-    log: list[tuple[str, int]] = [("Dữ liệu gốc sau khi gộp sheet", len(raw))]
-    df = standardize(raw)
+    # Bước 4: ngoại lai cực đoan
+    df = df[~outlier_mask(df)]
+    log.append((f"Bước 4. Bỏ ngoại lai cực đoan (IQR x {OUTLIER_K:g} trên log1p)", len(df)))
 
-    def step(name: str, frame: pd.DataFrame) -> pd.DataFrame:
-        log.append((name, len(frame)))
-        return frame
+    # Bước 5: Customer ID thiếu -> "Guest"; đổi kiểu sang chuỗi
+    df["Customer ID"] = df["Customer ID"].map(lambda v: "Guest" if pd.isna(v) else str(int(v)))
+    log.append(("Bước 5. Customer ID thiếu → 'Guest' (đổi kiểu sang chuỗi)", len(df)))
 
-    cols = ["Invoice", "StockCode", "Description", "Quantity", "InvoiceDate",
-            "Price", "CustomerID", "Country"]
-    df = step("Bỏ dòng trùng hoàn toàn", df.drop_duplicates(subset=cols))
-    df = step("Bỏ dòng thiếu CustomerID", df.dropna(subset=["CustomerID"]))
-    df = df.assign(CustomerID=df["CustomerID"].astype(int))
-    df = step("Bỏ mã hàng dịch vụ/phí/thử nghiệm", df[~df["StockCode"].isin(SERVICE_CODES)])
+    df["Revenue"] = (df["Quantity"] * df["Price"]).round(2)
+    df["IsGuest"] = df["Customer ID"].eq("Guest")
+    df = df.sort_values(["InvoiceDate", "Invoice"]).reset_index(drop=True)
 
-    is_cancel = df["Invoice"].str.startswith("C")
-    cancels = df[is_cancel & (df["Quantity"] < 0)]
-    sales = df[~is_cancel]
-    log.append(("Tách hóa đơn hủy (tiền tố C) sang bảng riêng", len(sales)))
-    sales = step("Bỏ dòng bán có Quantity <= 0 hoặc Price <= 0", sales[(sales["Quantity"] > 0) & (sales["Price"] > 0)])
-    cancels = cancels[cancels["Price"] > 0]
-
-    sales = sales.assign(LineValue=(sales["Quantity"] * sales["Price"]).round(2))
-    cancels = cancels.assign(LineValue=(cancels["Quantity"] * cancels["Price"]).round(2))
-    mask = reversed_sale_mask(sales, cancels)
-    sales = step("Bỏ dòng bán đã bị hủy nguyên vẹn (đơn lỗi/ngoại lai)", sales[~mask])
-
-    sales = sales.sort_values(["InvoiceDate", "Invoice"]).reset_index(drop=True)
-    cancels = cancels.sort_values(["InvoiceDate", "Invoice"]).reset_index(drop=True)
-    return sales, cancels, pd.DataFrame(log, columns=["Bước", "Số dòng còn lại"])
+    log_df = pd.DataFrame(log, columns=["Bước", "Số dòng còn lại"])
+    log_df["Số dòng bị loại"] = (-log_df["Số dòng còn lại"].diff()).fillna(0).astype(int)
+    log_df["% còn lại so với gốc"] = (log_df["Số dòng còn lại"] / len(raw) * 100).round(2)
+    return df, log_df
 
 
-def save_processed(sales: pd.DataFrame, cancels: pd.DataFrame, log: pd.DataFrame,
-                   out_dir: Path | str = PROCESSED_DIR) -> None:
-    """Ghi dữ liệu đã làm sạch vào `data/processed/`."""
+def save_processed(clean: pd.DataFrame, log_df: pd.DataFrame, out_dir: Path | str = PROCESSED_DIR) -> None:
+    """Ghi `data_clean.csv.gz` và `cleaning_log.csv` vào data/processed/."""
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
-    sales.to_csv(out / "online_retail_clean.csv", index=False, encoding="utf-8")
-    cancels.to_csv(out / "online_retail_cancellations.csv", index=False, encoding="utf-8")
-    log.to_csv(out / "preprocessing_log.csv", index=False, encoding="utf-8-sig")
+    clean.to_csv(out / "data_clean.csv.gz", index=False, encoding="utf-8")
+    log_df.to_csv(out / "cleaning_log.csv", index=False, encoding="utf-8-sig")

@@ -1,12 +1,20 @@
 # Form 2 — Đặc trưng hành vi mua thủ công
 
+**Mốc chính sách của báo cáo:** các kết quả làm sạch, khảo sát khách hàng và RFM trong bản EDA này dùng chính sách tại commit `1c7ce32`. `main` đã có thay đổi tiền xử lý tại commit `d17492d`; các con số ở đây chưa đánh giá chính sách mới đó. Notebook giữ mã tái hiện chính sách cũ ngay trong một ô riêng để chạy độc lập, không sửa hoặc gọi API cũ đã bị xóa khỏi `src/preprocessing.py`. Các mô tả “hiện tại/current” trong kết quả đã lưu được hiểu tại mốc `1c7ce32`.
+
 **Ngô Nguyên — 3124411191 — Nhóm 15.** Phạm vi: hành vi trước RFM;
 chưa chuẩn hóa, chọn biến mô hình hay gắn nhãn khách hàng.
 
-`src/preprocessing.py` hiện chỉ có docstring; `data/processed/` chỉ có `.gitkeep`.
-Do đó bảng kèm Form 2 là **khảo sát thử nghiệm từ bản sao dữ liệu thô**, không phải
-đầu ra tiền xử lý hoặc bảng đặc trưng chính thức. Căn cứ: proposal của nhóm,
-EDA v1 mục 3, 7.4 và 8.2. Không sửa notebook EDA, dữ liệu gốc hoặc module của Thuận.
+Tài liệu này mô tả API đặc trưng trong `src/features.py` và lưu bối cảnh khảo sát
+Form 2 trước đây. Các bảng kèm Form 2 là **khảo sát thử nghiệm từ bản sao dữ liệu
+thô**, không phải đầu ra tiền xử lý hoặc bảng đặc trưng chính thức.
+
+**Cập nhật sau khi làm lại EDA:** khảo sát hành vi đã được tích hợp vào
+`notebooks/01_eda/eda_v1.ipynb`; mở notebook và chọn **Restart Kernel → Run All**.
+`eda_v2_outlier.ipynb` cũng chứa code và chạy độc lập cho phần ngoại lệ/RFM.
+Xem [báo cáo EDA hiện tại](bao_cao_qua_trinh_eda.md) để biết kết quả đối chiếu
+pipeline và phạm vi dữ liệu mới. API đặc trưng và các bảng khảo sát lịch sử vẫn
+được giữ để sử dụng, kiểm thử và đối chiếu; mã tiền xử lý của Thuận không thay đổi.
 
 ## Giao diện
 
@@ -110,17 +118,17 @@ mua thành công. Dòng thiếu khách hàng được thống kê trong `DataFra
 gán về một khách hàng chung. Bảng C là góc nhìn riêng, không bị mất khi lọc bảng mua;
 `c_document_share` không thay thế `return_rate` và không mặc định đưa vào mô hình.
 
-## Bảng khảo sát và cách tái lập
+## Bảng khảo sát lịch sử và cách chạy hiện tại
 
 Các file trong `experiments/form2_manual_behavior_raw_survey/`:
 
 - `customer_behavior_experimental.csv`: một dòng/Customer ID, có nhãn `data_status` thử nghiệm.
 - `stock_code_audit_experimental.csv`: kiểm kê mọi mã trong cửa sổ cùng mô tả ví dụ và phân loại tạm.
 - `c_document_audit_experimental.csv`: góc nhìn chứng từ trước lọc mua; tỷ lệ hoàn trả vẫn `NaN`.
-- `metadata.json`: checksum nguồn, sheet, điều kiện lọc, số dòng/hóa đơn/khách hàng,
+- [phụ lục thông tin nguồn](#nguon-form2): checksum nguồn, sheet, điều kiện lọc, số dòng/hóa đơn/khách hàng,
   thời điểm, giới hạn và khách hàng được kiểm tra độc lập.
 
-Script khảo sát dùng điều kiện EDA 7.4 trên bản sao: mã khách hàng nguyên dương 5 số,
+Khảo sát cũ dùng các điều kiện trên bản sao nguồn: mã khách hàng nguyên dương 5 số,
 mã hóa đơn 6 số, Q/P > 0 và tích hữu hạn, trong cửa sổ, không có mâu thuẫn khách hàng/hóa đơn.
 Giữ mọi dòng trùng, ngoại lai, dịch vụ và phí trong giá trị đơn. Thời điểm hóa đơn lấy sớm nhất.
 Regex 5 số + hậu tố chữ **chỉ là giả định sản phẩm tạm thời**; các mã POST, D, M, B,
@@ -131,13 +139,16 @@ Từ root repository, trong Python có các thư viện sẵn có:
 
 ```powershell
 python -m unittest discover -s project/tests -v
-python project/notebooks/01_eda/export_manual_behavior_survey.py --window-start 2009-12-01 --reference-date 2011-12-10 --output-dir project/experiments/form2_manual_behavior_raw_survey
+python -X utf8 -m jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb
 ```
 
-Script yêu cầu thư mục đầu ra **chưa tồn tại**; khi chạy lại, chọn tên thư mục lần chạy khác
-trong `project/experiments/`. Không ghi đè lần trước hoặc ghi vào `data/raw/`, `data/processed/`.
-Môi trường Windows đã kiểm tra dùng Python 3.12 gốc với thư viện của `.venv-eda`
-(launcher `.venv-eda` bị Application Control chặn); không cài thêm thư viện.
+Notebook EDA hiện tại tạo lại kết quả trong `experiments/eda_rebuild/`, bao gồm
+3 CSV bàn giao (`customer_behavior`, `rfm`, `rfm_transformed`), hình và kết quả hiển thị trong notebook.
+Các bảng kiểm tra chỉ hiển thị trong EDA; tham số scaling hiển thị trong notebook. Báo cáo chi tiết đã
+hoàn thành được giữ riêng, không ghi lại bằng Run All. Chọn Python/kernel
+có đủ thư viện theo [hướng dẫn EDA](../notebooks/01_eda/README.md).
+Các CSV và phụ lục thông tin nguồn Form 2 cũ được giữ làm bằng chứng lịch sử, không bị ghi đè
+và không được dùng thay cho kết quả trên tập sau pipeline hiện tại.
 
 Fixture 8 dòng tự tạo trong `tests/test_features.py` chỉ phục vụ **kiểm thử**.
 Khách `10001` có 5 dòng nhưng 3 đơn giá trị 28, 24, 4 GBP: AOV = 56/3,
@@ -151,9 +162,10 @@ mã hàng chưa phân loại nên các chỉ số sản phẩm chưa xác địn
 cho toàn bộ bảng. Chẳng hạn Customer ID **12350** có 17 dòng nguồn, 1 hóa đơn và
 đúng **1 dòng đầu ra**, với khoảng cách `NaN`. Đây vẫn là kết quả **khảo sát thử nghiệm**.
 Bộ 20 kiểm thử nhỏ đều đạt; bảng CSV đã đọc lại và kiểm tra khóa, tổng số dòng/đơn,
-giá trị thiếu, thời điểm và checksum. Script còn đối chiếu độc lập AOV/khoảng cách
-trên 4 mã khách hàng ghi trong `metadata.json`. Không có dữ liệu chính thức để chạy
-tích hợp với pipeline tiền xử lý; checksum dữ liệu gốc giữ nguyên.
+giá trị thiếu, thời điểm và checksum. Lần khảo sát cũ còn đối chiếu độc lập AOV/khoảng cách
+trên 4 mã khách hàng ghi trong [phụ lục thông tin nguồn](#nguon-form2); checksum dữ liệu gốc giữ nguyên.
+Các số liệu trên thuộc lần khảo sát thô cũ. Kết quả tích hợp với pipeline hiện tại
+và sự khác nhau giữa hai phạm vi được trình bày trong báo cáo EDA mới.
 
 ## Các điểm cần Thuận/nhóm xác nhận
 
@@ -165,3 +177,63 @@ tích hợp với pipeline tiền xử lý; checksum dữ liệu gốc giữ ngu
 4. Góc nhìn giữ chứng từ trước lọc, nguồn xác minh/ghép đơn gốc và định nghĩa tỷ lệ hoàn trả.
 5. Chọn biến sau khảo sát tương quan/độ lệch và chính sách giá trị thiếu; không mặc định
    dùng tất cả đặc trưng, thay `NaN` bằng 0 hoặc fit bộ chuẩn hóa ở bước này.
+
+
+<a id="nguon-form2"></a>
+
+## Phụ lục: thông tin nguồn lần khảo sát Form 2 cũ
+
+Thông tin được chuyển nguyên giá trị từ metadata của lần khảo sát cũ trước khi xóa tệp JSON.
+Các CSV khảo sát lịch sử được giữ nguyên.
+
+| Trường | Giá trị |
+|---|---|
+| data_status | experimental_raw_survey_not_official |
+| source | data/raw/online_retail_II.xlsx |
+| source_sha256 | bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980 |
+| window.window_start | 2009-12-01 |
+| window.reference_date | 2011-12-10 |
+| window.closed | left |
+| python | 3.12.15 |
+| pandas | 3.1.0 |
+| numpy | 2.5.4 |
+| sheet_rows.Year 2009-2010 | 525461 |
+| sheet_rows.Year 2010-2011 | 541910 |
+| raw_rows | 1067371 |
+| candidate_rows | 805549 |
+| candidate_invoices | 36969 |
+| candidate_customers | 5878 |
+| c_audit_customers | 5942 |
+| candidate_duplicate_excess_on_8_source_columns | 26124 |
+| orders_with_multiple_timestamps | 64 |
+| single_order_customers | 1623 |
+| customers_with_incomplete_product_classification | 89 |
+| stock_classification.product | provisional regex: 5 digits plus optional letter suffix |
+| stock_classification.non_product | ["B", "BANK CHARGES", "D", "DOT", "M", "POST"] |
+| stock_classification.other_codes | unknown; not silently excluded |
+| verified_return_rate | undefined; all values NaN, not zero |
+| duplicates | preserved |
+| purchase_time_policy | earliest within selected window |
+| feature_scope.window_start | 2009-12-01T00:00:00 |
+| feature_scope.reference_date | 2011-12-10T00:00:00 |
+| feature_scope.window_closed | left |
+| feature_scope.input_rows | 805549 |
+| feature_scope.window_rows | 805549 |
+| feature_scope.outside_window_rows | 0 |
+| feature_scope.invoice_time_policy | earliest |
+| feature_scope.value_scope | all_supplied_purchase_lines_including_non_products |
+| feature_scope.quantity_scope | classified_product_lines_only |
+| feature_scope.duplicates | preserved |
+| feature_scope.return_rate_definition | unresolved |
+| feature_scope.optional_features_included | true |
+| c_document_audit_scope.window_start | 2009-12-01T00:00:00 |
+| c_document_audit_scope.reference_date | 2011-12-10T00:00:00 |
+| c_document_audit_scope.window_closed | left |
+| c_document_audit_scope.input_rows | 1067371 |
+| c_document_audit_scope.window_rows | 1067371 |
+| c_document_audit_scope.outside_window_rows | 0 |
+| c_document_audit_scope.unassigned_customer_rows | 243007 |
+| c_document_audit_scope.missing_quantity_rows | 0 |
+| filter_steps | [{"step": "Trong cửa sổ [start, reference)", "rows_remaining": 1067371, "rows_removed_at_step": 0, "invoices": 53628, "customers": 5942}, {"step": "Customer ID hợp lệ về hình thức như EDA", "rows_remaining": 824364, "rows_removed_at_step": 243007, "invoices": 44876, "customers": 5942}, {"step": "Invoice đúng 6 chữ số, không C", "rows_remaining": 805620, "rows_removed_at_step": 18744, "invoices": 36975, "customers": 5881}, {"step": "Quantity > 0, Price > 0, tích hữu hạn", "rows_remaining": 805549, "rows_removed_at_step": 71, "invoices": 36969, "customers": 5878}, {"step": "Không có Invoice gắn nhiều Customer ID", "rows_remaining": 805549, "rows_removed_at_step": 0, "invoices": 36969, "customers": 5878}] |
+| independent_check_customer_ids | ["12346", "12350", "15315", "18287"] |
+| limitations | ["No official preprocessing input or verified product catalog.", "C/negative events not matched to original invoices; no verified return rate.", "AOV includes retained service/adjustment lines; quantity counts classified products only.", "Duplicate and overlapping sheet rows remain; amounts/quantities can be inflated.", "Only eligible lines of an invoice may remain; not guaranteed complete baskets.", "Tenure is observed within window; not true customer acquisition tenure."] |

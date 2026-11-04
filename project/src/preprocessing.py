@@ -1,7 +1,4 @@
 """Tiền xử lý Online Retail II cho bài toán phân cụm khách hàng RFM.
-
-Các quy tắc và lý do chọn được giải thích trong
-`notebooks/01_eda/preprocessing_v1.ipynb` (mục 5 và 6). Dữ liệu gốc không bị sửa.
 """
 from __future__ import annotations
 
@@ -13,13 +10,13 @@ import pandas as pd
 RAW_PATH = Path("data/raw/online_retail_II.xlsx")
 PROCESSED_DIR = Path("data/processed")
 
-# Mã hàng không phải sản phẩm (phí, bưu phí, điều chỉnh sổ sách, hàng thử...).
+
 SPECIAL_CODES = {
     "POST", "DOT", "M", "C2", "C3", "D", "S", "B", "BANK CHARGES",
     "ADJUST", "ADJUST2", "AMAZONFEE", "CRUK", "TEST001", "TEST002",
 }
 OUTLIER_COLS = ["Quantity", "Price"]
-OUTLIER_K = 3.0  # hệ số IQR (ngoại lai "cực đoan"), áp dụng trên thang log1p
+OUTLIER_K = 3.0  
 
 
 def load_raw(path: Path | str = RAW_PATH) -> pd.DataFrame:
@@ -44,7 +41,7 @@ def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     log: list[tuple[str, int]] = [("Dữ liệu gốc (đã gộp 2 sheet)", len(raw))]
     df = raw.copy()
 
-    # Bước 1: điền Description thiếu + chuẩn hóa văn bản
+   
     df["Description"] = df["Description"].fillna("Unknown Product")
     df["Description"] = df["Description"].astype(str).str.strip().str.upper()
     df["Invoice"] = df["Invoice"].astype(str).str.strip().str.upper()
@@ -52,11 +49,11 @@ def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     df["Country"] = df["Country"].astype(str).str.strip().replace({"EIRE": "Ireland"})
     log.append(("Bước 1. Điền Description thiếu, chuẩn hóa văn bản, EIRE → Ireland", len(df)))
 
-    # Bước 2: dòng trùng
+    
     df = df.drop_duplicates()
     log.append(("Bước 2. Bỏ dòng trùng lặp", len(df)))
 
-    # Bước 3: hóa đơn hủy, Quantity/Price không dương, mã hàng đặc biệt
+    
     df = df[~df["Invoice"].str.startswith("C")]
     log.append(("Bước 3a. Bỏ hóa đơn hủy (Invoice bắt đầu bằng C)", len(df)))
     df = df[(df["Quantity"] > 0) & (df["Price"] > 0)]
@@ -64,11 +61,11 @@ def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     df = df[~df["StockCode"].isin(SPECIAL_CODES)]
     log.append(("Bước 3c. Bỏ mã hàng đặc biệt (POST, M, BANK CHARGES...)", len(df)))
 
-    # Bước 4: ngoại lai cực đoan
+    
     df = df[~outlier_mask(df)]
     log.append((f"Bước 4. Bỏ ngoại lai cực đoan (IQR x {OUTLIER_K:g} trên log1p)", len(df)))
 
-    # Bước 5: Customer ID thiếu -> "Guest"; đổi kiểu sang chuỗi
+    
     df["Customer ID"] = df["Customer ID"].map(lambda v: "Guest" if pd.isna(v) else str(int(v)))
     log.append(("Bước 5. Customer ID thiếu → 'Guest' (đổi kiểu sang chuỗi)", len(df)))
 

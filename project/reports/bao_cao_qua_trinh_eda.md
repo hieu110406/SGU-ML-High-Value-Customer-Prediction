@@ -279,7 +279,7 @@ Count, mean/median, min/max, Q1/Q3/IQR, P95/P99 và skew được tính trên to
 
 **Câu hỏi phân tích.** R, F, M riêng lẻ có miền và độ lệch thế nào?
 
-**Dữ liệu và phạm vi.** Thử nghiệm trên 5,849 khách có ID; một dòng/khách, sau clean_data hiện tại; cửa sổ [2009-12-01, 2011-12-10). Guest được loại khỏi khảo sát khách sau pipeline.
+**Dữ liệu và phạm vi.** Thử nghiệm trên 5,849 khách có ID; một dòng/khách, cùng cửa sổ [2009-12-01, 2011-12-10). Dùng bảng khách đã tính trong notebook; Guest không là một khách.
 
 ![Phân phối từng biến RFM](../notebooks/01_eda/figures/rfm_experimental_distributions.png)
 
@@ -924,42 +924,42 @@ Dùng `log1p` R/F/M rồi StandardScaler (phương sai ddof=0), fit trên **toà
 
 ## 14. Danh sách hình và hướng dẫn chạy lại
 
-Mã được tổ chức trong `eda_analysis.py` (tính/kiểm tra), `eda_presentation.py` (vẽ/nhận xét), `eda_report.py` (báo cáo). Notebook dùng cell ngắn gọi các hàm này; toàn bộ công thức và mã nguồn ở cùng vùng EDA, có thể kiểm tra. Cả hai notebook tự đọc workbook và chạy độc lập, không đọc kết quả cache của nhau.
+Toàn bộ EDA nằm trong một notebook: [eda_v1.ipynb](../notebooks/01_eda/eda_v1.ipynb). Luồng đọc là **cấu trúc/chất lượng → đơn biến → thời gian/quốc gia → hai/đa biến → tương quan → ngoại lệ → đối chiếu tiền xử lý → RFM/scaling → kiểm tra/xuất báo cáo**.
 
-- `eda_v1.ipynb`: cấu trúc/chất lượng, đơn biến, thời gian/quốc gia, hai/đa biến, tương quan; xuất 9 CSV và báo cáo hiện tại sau kiểm tra.
-- `eda_v2_outlier.ipynb`: tự tính lại, tập trung phân phối/ngoại lệ/RFM/scaling; không ghi đè CSV hoặc báo cáo; tái tạo có chủ đích các PNG chuyên sâu dùng chung.
+- Đọc workbook và chạy pipeline trong bộ nhớ một lần; dùng cùng bảng khách cho mọi phép phân tích. Mỗi hình/bảng quan trọng được trình bày tại một vị trí phù hợp, không cần chạy notebook khác hoặc trao đổi cache giữa các notebook.
+- Mã tính/kiểm tra nằm trong `eda_analysis.py`, mã vẽ/nhận xét trong `eda_presentation.py`, mã báo cáo trong `eda_report.py`. Notebook gọi bằng các cell ngắn; toàn bộ công thức và mã nguồn có thể kiểm tra.
 - Kết quả mới: `experiments/eda_current_policy/`; kết quả lịch sử giữ tại `experiments/eda_rebuild/` và `experiments/form2_manual_behavior_raw_survey/`.
 
-| figure | section | title |
-| --- | --- | --- |
-| missing_values_by_column.png | 2 | Dữ liệu thiếu theo cột |
-| invoices_by_c_prefix.png | 2 | Loại chứng từ C/không C |
-| raw_transaction_full_distributions.png | 3 | Phân phối giao dịch thô |
-| raw_categorical_distributions.png | 3 | Phân phối biến phân loại |
-| customer_behavior_distributions.png | 3 | Phân phối hành vi khách hàng |
-| customer_purchase_gaps.png | 3 | Khoảng cách mua và số đơn |
-| rfm_experimental_distributions.png | 3 | Phân phối từng biến RFM |
-| invoices_by_month.png | 4 | Hóa đơn theo tháng |
-| signed_line_value_by_month.png | 4 | Giá trị theo tháng và phạm vi chính sách |
-| transactions_by_weekday_hour.png | 4 | Tần suất theo thứ và giờ |
-| country_activity.png | 5 | Hoạt động theo quốc gia |
-| country_activity_excluding_uk.png | 5 | Quốc gia ngoài UK |
-| customer_frequency_vs_monetary.png | 6 | Num vs Num: quan hệ giữa các đặc trưng |
-| customer_value_by_country.png | 6 | Num vs Cat: quốc gia và nhóm số đơn |
-| country_vs_invoice_type.png | 6 | Cat vs Cat: quốc gia và chứng từ |
-| customer_order_group_by_country.png | 6 | Cat vs Cat: quốc gia và nhóm khách |
-| rfm_multivariate_scatter.png | 7 | RFM đồng thời |
-| behavior_multivariate_scatter.png | 7 | Đặc trưng thủ công đồng thời |
-| country_frequency_monetary.png | 7 | Frequency/Monetary theo quốc gia |
-| correlation_spearman_heatmap.png | 8 | Ma trận tương quan Spearman |
-| correlation_pearson_heatmap.png | 8 | Ma trận tương quan Pearson |
-| correlation_pairwise_counts.png | 8 | Số quan sát hợp lệ theo cặp |
-| clean_transaction_full_distributions.png | 9 | Phân phối sau chính sách hiện tại |
-| preprocessing_row_flow.png | 10 | Đối chiếu số dòng qua pipeline |
+| figure | section | title | notebook |
+| --- | --- | --- | --- |
+| missing_values_by_column.png | 2 | Dữ liệu thiếu theo cột | eda_v1.ipynb |
+| invoices_by_c_prefix.png | 2 | Loại chứng từ C/không C | eda_v1.ipynb |
+| raw_transaction_full_distributions.png | 3 | Phân phối giao dịch thô | eda_v1.ipynb |
+| raw_categorical_distributions.png | 3 | Phân phối biến phân loại | eda_v1.ipynb |
+| customer_behavior_distributions.png | 3 | Phân phối hành vi khách hàng | eda_v1.ipynb |
+| customer_purchase_gaps.png | 3 | Khoảng cách mua và số đơn | eda_v1.ipynb |
+| rfm_experimental_distributions.png | 3 | Phân phối từng biến RFM | eda_v1.ipynb |
+| invoices_by_month.png | 4 | Hóa đơn theo tháng | eda_v1.ipynb |
+| signed_line_value_by_month.png | 4 | Giá trị theo tháng và phạm vi chính sách | eda_v1.ipynb |
+| transactions_by_weekday_hour.png | 4 | Tần suất theo thứ và giờ | eda_v1.ipynb |
+| country_activity.png | 5 | Hoạt động theo quốc gia | eda_v1.ipynb |
+| country_activity_excluding_uk.png | 5 | Quốc gia ngoài UK | eda_v1.ipynb |
+| customer_frequency_vs_monetary.png | 6 | Num vs Num: quan hệ giữa các đặc trưng | eda_v1.ipynb |
+| customer_value_by_country.png | 6 | Num vs Cat: quốc gia và nhóm số đơn | eda_v1.ipynb |
+| country_vs_invoice_type.png | 6 | Cat vs Cat: quốc gia và chứng từ | eda_v1.ipynb |
+| customer_order_group_by_country.png | 6 | Cat vs Cat: quốc gia và nhóm khách | eda_v1.ipynb |
+| rfm_multivariate_scatter.png | 7 | RFM đồng thời | eda_v1.ipynb |
+| behavior_multivariate_scatter.png | 7 | Đặc trưng thủ công đồng thời | eda_v1.ipynb |
+| country_frequency_monetary.png | 7 | Frequency/Monetary theo quốc gia | eda_v1.ipynb |
+| correlation_spearman_heatmap.png | 8 | Ma trận tương quan Spearman | eda_v1.ipynb |
+| correlation_pearson_heatmap.png | 8 | Ma trận tương quan Pearson | eda_v1.ipynb |
+| correlation_pairwise_counts.png | 8 | Số quan sát hợp lệ theo cặp | eda_v1.ipynb |
+| clean_transaction_full_distributions.png | 9 | Phân phối sau chính sách hiện tại | eda_v1.ipynb |
+| preprocessing_row_flow.png | 10 | Đối chiếu số dòng qua pipeline | eda_v1.ipynb |
 
 ### Hình cũ: thay thế, giữ lại và xóa
 
-Giữ 13 tên hình cũ và tái tạo theo phạm vi mới; thêm 11 tên hình. Ba hình dư được xóa sau khi kiểm tra bộ hình mới: `customer_orders_vs_value.png` thay bằng panel sáu cặp số; `signed_line_value_by_country.png` gộp vào hình quốc gia bốn chỉ tiêu; `raw_transaction_histograms_p01_p99.png` thay bằng histogram/boxplot toàn miền symlog. Không có hình nhị phân cũ nào được giữ nguyên không kiểm tra. Không xóa hình ngoài EDA. Chi tiết SHA256 trong [kiểm kê hình](../experiments/eda_current_policy/figure_inventory.csv).
+Bộ 24 PNG được giữ lại và trình bày đúng một lần trong notebook duy nhất. Kiểm kê so SHA256 với HEAD trong [figure_inventory.csv](../experiments/eda_current_policy/figure_inventory.csv). Gộp notebook không làm mất hình hoặc nội dung phân tích.
 
 ### Môi trường và cách chạy
 
@@ -967,8 +967,9 @@ Từ gốc repository, chọn môi trường có requirements cùng nbformat, nb
 
 ```powershell
 & project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb
-& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v2_outlier.ipynb
 ```
+
+Xuất 9 CSV kết quả cần bàn giao cùng metadata SHA256. Các bảng mô tả giao dịch/khách và mẫu cực trị được tính, kiểm tra và hiển thị trực tiếp trong notebook; không xuất thêm bản cache của chúng.
 
 Notebook tự tìm project từ thư mục làm việc trong repository, không dùng đường dẫn máy tác giả. Mỗi notebook có kiểm tra khóa/tổng/công thức/thiếu, mọi cặp tương quan được đối chiếu scipy, và SHA256 đầu vào trước/sau. Báo cáo dùng cùng bảng/nhận xét đã tính nên khi dữ liệu/chính sách đổi, chạy lại v1 sẽ cập nhật số và diễn giải; không sửa tay kết quả. Ngày/múi giờ nguồn không bị chuyển.
 
@@ -976,10 +977,10 @@ Notebook tự tìm project từ thư mục làm việc trong repository, không 
 
 | Trường | Giá trị |
 | --- | --- |
-| run_at | 2026-11-05T08:35:13.509954+07:00 |
+| run_at | 2026-11-05T09:29:06.819379+07:00 |
 | client_date | 2026-11-05 |
 | timezone | Asia/Bangkok |
-| git_head | df066eeca48f6b2aa11398f98f8e057db63a011d |
+| git_head | fdbe1e29edc0a219bd75e93f3318ea052e144c74 |
 | window_start | 2009-12-01 |
 | reference_date_exclusive | 2011-12-10 |
 | source_timestamp_timezone | unspecified; no timezone conversion |

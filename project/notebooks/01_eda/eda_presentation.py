@@ -8,7 +8,7 @@ matplotlib.use("Agg")  # PNGs are displayed explicitly; no GUI/Tk dependency.
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FuncFormatter
 
-from eda_analysis import CORRELATION_COLUMNS, PAIRS, REFERENCE_DATE
+from eda_analysis import CORRELATION_COLUMNS, PAIRS, REFERENCE_DATE, checksum
 
 BLUE, GOLD, ORANGE = "#2166ac", "#a37c00", "#c56b28"
 GROUPS = ["UK", "Other-country", "Multi-country"]
@@ -19,7 +19,7 @@ LABELS = {"Frequency":"Purchase invoices", "Monetary":"Purchase value (GBP)", "R
           "avg_purchase_gap_days":"Mean purchase gap (days)", "observed_tenure_days":"Observed tenure (days)",
           "total_quantity_candidate":"Retained units*", "avg_quantity_per_order_candidate":"Retained units/invoice*"}
 
-# Each figure is deliberately assigned to a notebook section; v2 rerenders only its scope.
+# All figures are presented once in the single EDA notebook.
 FIGURES = {
     "missing_values_by_column": (2, "Dữ liệu thiếu theo cột"),
     "invoices_by_c_prefix": (2, "Loại chứng từ C/không C"),
@@ -67,6 +67,14 @@ def _compact(value, position=None):
 
 
 def narrative(result, key):
+    if key == "rfm_experimental_distributions":
+        b = result["tables"]["customer_behavior"]
+        return dict(
+            question="R, F, M riêng lẻ có miền và độ lệch thế nào?",
+            scope=f"Thử nghiệm trên {len(b):,} khách có ID; một dòng/khách, cùng cửa sổ [2009-12-01, 2011-12-10). Dùng bảng khách đã tính trong notebook; Guest không là một khách.",
+            observed=f"Trung vị R={b.Recency.median():.2f} ngày; F={b.Frequency.median():.0f} hóa đơn; M={b.Monetary.median():,.2f} GBP. R thiếu {b.Recency.isna().sum()}, F thiếu {b.Frequency.isna().sum()}, M thiếu {b.Monetary.isna().sum()} khách; skew R/F/M={b.Recency.skew():.2f}/{b.Frequency.skew():.2f}/{b.Monetary.skew():.2f}.",
+            meaning="RFM thử nghiệm đủ dữ liệu cho khảo sát biến đổi; F/M có thang khác R nên cần cân nhắc trọng số và scaling.",
+            limit="R = reference − last invoice time; F = n_orders, M = total_purchase_value. Mốc tham chiếu 2011-12-10 loại trừ, không phải ngày hiện tại. Chưa chọn bộ biến mô hình chính thức.")
     requested_key = key
     t, raw, b = result["tables"], result["raw"], result["tables"]["customer_behavior"]
     n, nr = len(b), len(raw)
@@ -103,9 +111,6 @@ def narrative(result, key):
     add("customer_purchase_gaps", "Có bao nhiêu khách đủ lịch sử để tính khoảng cách mua?", customer_scope,
         f"{single:,}/{n:,} khách ({100*single/n:.2f}%) chỉ một Invoice; {n-single:,} khách còn lại có gap, trung vị {b.avg_purchase_gap_days.median():.2f} ngày. Gap nhỏ nhất {b.avg_purchase_gap_days.min():.2f} ngày.",
         "Gap thiếu có ý nghĩa cấu trúc; khi phân cụm cần chính sách thiếu/cờ một đơn, giữ 0 thật nếu các hóa đơn cùng thời điểm.", "Không điền NaN bằng 0. Invoice nhiều thời điểm dùng earliest trong các dòng giữ lại; chưa biết lịch sử trước/sau cửa sổ.")
-    add("rfm_experimental_distributions", "R, F, M riêng lẻ có miền và độ lệch thế nào?", customer_scope,
-        f"Trung vị R={b.Recency.median():.2f} ngày; F={b.Frequency.median():.0f} hóa đơn; M={b.Monetary.median():,.2f} GBP. R thiếu {b.Recency.isna().sum()}, F thiếu {b.Frequency.isna().sum()}, M thiếu {b.Monetary.isna().sum()} khách; skew R/F/M={b.Recency.skew():.2f}/{b.Frequency.skew():.2f}/{b.Monetary.skew():.2f}.",
-        "RFM thử nghiệm đủ dữ liệu cho khảo sát biến đổi; F/M có thang khác R nên cần cân nhắc trọng số và scaling.", "R = reference − last invoice time; F = n_orders, M = total_purchase_value. Mốc tham chiếu 2011-12-10 loại trừ, không phải ngày hiện tại. Chưa chọn bộ biến mô hình chính thức.")
     m = t["monthly"]
     peak = m.invoices.idxmax()
     add("invoices_by_month", "Số Invoice duy nhất biến động theo tháng ra sao?", raw_scope,
@@ -215,7 +220,7 @@ def _distribution(frame, columns, title, signed=False):
 
 def plot_figure(result, key):
     configure_style()
-    t,raw,b = result["tables"],result["raw"],result["tables"]["customer_behavior"]
+    t,raw,b = result["tables"],result.get("raw"),result["tables"]["customer_behavior"]
     n = len(b)
     if key == "missing_values_by_column":
         fig,ax=plt.subplots(figsize=(10,4.5),layout="constrained")
@@ -378,6 +383,7 @@ def save_figure(result, key):
     fig=plot_figure(result,key)
     fig.savefig(path,dpi=140,bbox_inches="tight",facecolor="white")
     plt.close(fig)
+    result["metadata"].setdefault("figure_sha256", {})[key] = checksum(path)
     return path
 
 

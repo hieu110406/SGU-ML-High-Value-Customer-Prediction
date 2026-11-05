@@ -11,7 +11,8 @@ thô**, không phải đầu ra tiền xử lý hoặc bảng đặc trưng chí
 
 **Cập nhật sau khi làm lại EDA:** khảo sát hành vi đã được tích hợp vào
 `notebooks/01_eda/eda_v1.ipynb`; mở notebook và chọn **Restart Kernel → Run All**.
-`eda_v2_outlier.ipynb` cũng chứa code và chạy độc lập cho phần ngoại lệ/RFM.
+Phần ngoại lệ, RFM và scaling đã gộp vào cùng notebook này; chỉ cần chạy một file,
+không dùng notebook phụ hoặc cache trao đổi. Xem [hướng dẫn EDA](../notebooks/01_eda/README.md).
 Xem [báo cáo EDA hiện tại](bao_cao_qua_trinh_eda.md) để biết kết quả đối chiếu
 pipeline và phạm vi dữ liệu mới. API đặc trưng và các bảng khảo sát lịch sử vẫn
 được giữ để sử dụng, kiểm thử và đối chiếu; mã tiền xử lý của Thuận không thay đổi.

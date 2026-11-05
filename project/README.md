@@ -92,7 +92,7 @@ project/
 │   └── feature/          # Sau feature engineering (RFM, RFM mở rộng)
 ├── experiments/          # Đầu ra từng lần chạy, không ghi đè
 ├── notebooks/
-│   ├── 01_eda/                 # eda_v1, eda_v2_outlier
+│   ├── 01_eda/                 # eda_v1
 │   ├── 02_baseline_kmeans/     # kmeans_v1_elbow, kmeans_v2_silhouette
 │   ├── 03_clustering_eval/     # hierarchical_v1_ward, dbscan_v1_eps_grid
 │   ├── 04_pca_profiling/       # pca_v1, profiling_v1
@@ -209,10 +209,10 @@ tập còn lại. Chưa có ngày tham chiếu hay giá trị `random_state` nà
 |---|---|
 | Cấu trúc thư mục, `requirements.txt`, `.gitignore` | Đã có |
 | Dữ liệu thô `data/raw/` | Đã có |
-| `notebooks/01_eda/eda_v1.ipynb` | Hoàn thành, đã chạy |
+| `notebooks/01_eda/eda_v1.ipynb` | EDA duy nhất: tổng quan, quan hệ, tương quan, ngoại lệ và RFM/scaling; xem [hướng dẫn](notebooks/01_eda/README.md) |
 | Bản thảo Chương 1 (`reports/chuong_1_gioi_thieu_sprint1_T03.md`), Proposal | Đã có |
 | `src/*.py`, `configs/*.yaml`, `app/*.py` | Khung rỗng (docstring/TODO) |
-| `eda_v2_outlier`, K-Means, Hierarchical, DBSCAN, PCA, profiling | Notebook rỗng |
+| K-Means, Hierarchical, DBSCAN, PCA, profiling | Notebook rỗng |
 | Báo cáo đầy đủ, slide, demo Streamlit | Chưa bắt đầu |
 
 Lịch chi tiết 02/11 – 18/11/2026 (8 sprint, 33 đầu việc) nằm trong tệp theo dõi tiến độ của nhóm.

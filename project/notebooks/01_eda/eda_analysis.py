@@ -1,4 +1,4 @@
-"""Computations shared by the two EDA notebooks; no writes to raw/processed/src.
+"""Computations for the single EDA notebook; no writes to raw/processed/src.
 
 Current clean_data is evaluated as an experimental policy, not a business approval.
 All customer statistics use the same known-ID purchase window. No model is fit.
@@ -31,6 +31,11 @@ PAIRS = [("Frequency", "Monetary"), ("Recency", "Monetary"),
          ("Frequency", "avg_order_value"), ("n_stock_codes_candidate", "Monetary"),
          ("total_quantity_candidate", "Monetary"),
          ("avg_quantity_per_order_candidate", "avg_order_value")]
+EXPORT_TABLES = (
+    "customer_behavior", "rfm", "rfm_transformed", "correlation_spearman", "correlation_pearson",
+    "correlation_pairwise_counts", "correlation_column_audit", "preprocessing_trace", "scaling_parameters",
+)
+MATRIX_TABLES = {"correlation_spearman", "correlation_pearson", "correlation_pairwise_counts"}
 
 
 def checksum(path):
@@ -312,16 +317,10 @@ def load_analysis(project):
     return result
 
 
-def validate_analysis(result):
-    """Reconcile important results from transaction/order inputs, not saved chart values."""
-    t, p, orders = result["tables"], result["purchase"], result["orders"]
+def validate_customer_tables(t):
+    """Validate customer formulas, RFM, correlations and scaling from computed tables."""
     b = t["customer_behavior"].set_index("Customer ID")
-    assert b.index.is_unique and len(b) == p["Customer ID"].nunique()
-    assert b.n_transaction_rows.sum() == len(p)
-    pd.testing.assert_series_equal(b.Frequency.sort_index(), p.groupby("Customer ID").Invoice.nunique().sort_index(),
-                                   check_names=False, check_index_type=False, check_dtype=False)
-    exact = (p.Quantity*p.Price).groupby(p["Customer ID"]).sum().sort_index()
-    np.testing.assert_allclose(b.Monetary.sort_index(), exact, rtol=1e-12)
+    assert b.index.is_unique
     np.testing.assert_allclose(b.avg_order_value*b.Frequency, b.Monetary, rtol=1e-12)
     assert b.loc[b.Frequency.eq(1), "avg_purchase_gap_days"].isna().all()
     assert b.loc[b.Frequency.gt(1), "avg_purchase_gap_days"].notna().all()
@@ -329,7 +328,12 @@ def validate_analysis(result):
     expected = (pd.to_datetime(b.last_purchase_time)-pd.to_datetime(b.first_purchase_time)).dt.total_seconds()/86400/(b.Frequency-1).replace(0,np.nan)
     np.testing.assert_allclose(b.avg_purchase_gap_days, expected, equal_nan=True)
     assert b[["n_distinct_products", "avg_quantity_per_order", "total_quantity", "return_rate"]].isna().all().all()
-    assert b.Recency.gt(0).all() and len(orders) == b.Frequency.sum()
+    assert b.Recency.gt(0).all()
+    for name in ["rfm", "rfm_transformed"]:
+        assert t[name]["Customer ID"].is_unique
+        assert t[name]["Customer ID"].tolist() == b.index.tolist()
+    for name in ["Recency", "Frequency", "Monetary"]:
+        np.testing.assert_allclose(t["rfm"][name], b[name], rtol=1e-12)
     counts = t["correlation_pairwise_counts"]
     assert counts.equals(counts.T)
     from scipy.stats import spearmanr, pearsonr
@@ -341,13 +345,38 @@ def validate_analysis(result):
             right = pair[y].to_numpy()
             np.testing.assert_allclose(t["correlation_spearman"].loc[x,y], spearmanr(left,right).statistic, atol=1e-12)
             np.testing.assert_allclose(t["correlation_pearson"].loc[x,y], pearsonr(left,right).statistic, atol=1e-12)
+    logged = np.log1p(b[["Recency", "Frequency", "Monetary"]].astype(float))
+    parameters = t["scaling_parameters"].set_index("feature").loc[logged.columns]
+    np.testing.assert_allclose(parameters.mean_log1p, logged.mean(), rtol=1e-12)
+    np.testing.assert_allclose(parameters.variance_log1p, logged.var(ddof=0), rtol=1e-12)
+    np.testing.assert_allclose(parameters.scale_log1p, logged.std(ddof=0), rtol=1e-12)
+    assert parameters.fit_customers.eq(len(b)).all()
+    for name in logged:
+        np.testing.assert_allclose(t["rfm_transformed"]["log1p_"+name], logged[name], rtol=1e-12)
+        expected_z = (logged[name]-parameters.loc[name, "mean_log1p"])/parameters.loc[name, "scale_log1p"]
+        np.testing.assert_allclose(t["rfm_transformed"]["z_log1p_"+name], expected_z, atol=1e-12)
+    z = t["rfm_transformed"].filter(like="z_log1p_")
+    np.testing.assert_allclose(z.mean(), 0, atol=1e-12)
+    np.testing.assert_allclose(z.std(ddof=0), 1, atol=1e-12)
+    return "Đạt: khóa khách, AOV/gap, RFM, mọi cặp tương quan/n và tham số scaling."
+
+
+def validate_analysis(result):
+    """Reconcile important results against the original transaction/order inputs."""
+    t, p, orders = result["tables"], result["purchase"], result["orders"]
+    b = t["customer_behavior"].set_index("Customer ID")
+    validate_customer_tables(t)
+    assert len(b) == p["Customer ID"].nunique()
+    assert b.n_transaction_rows.sum() == len(p)
+    pd.testing.assert_series_equal(b.Frequency.sort_index(), p.groupby("Customer ID").Invoice.nunique().sort_index(),
+                                   check_names=False, check_index_type=False, check_dtype=False)
+    exact = (p.Quantity*p.Price).groupby(p["Customer ID"]).sum().sort_index()
+    np.testing.assert_allclose(b.Monetary.sort_index(), exact, rtol=1e-12)
+    assert len(orders) == b.Frequency.sum()
     assert t["country_invoice_counts"].to_numpy().sum() == len(result["raw"])
     assert t["country_order_counts"].to_numpy().sum() == len(b)
     np.testing.assert_allclose(t["country_invoice_row_pct"].sum(axis=1), 100)
     np.testing.assert_allclose(t["country_order_row_pct"].sum(axis=1), 100)
-    z = t["rfm_transformed"].filter(like="z_log1p_")
-    np.testing.assert_allclose(z.mean(), 0, atol=1e-12)
-    np.testing.assert_allclose(z.std(ddof=0), 1, atol=1e-12)
     assert protected_hashes(result["project"]) == result["metadata"]["protected_before"]
     return "Đạt: khóa, công thức, tổng, khoảng cách, mọi cặp tương quan/n, scaling và checksum nguồn."
 
@@ -355,10 +384,11 @@ def validate_analysis(result):
 def export_tables(result):
     output = result["project"] / "experiments/eda_current_policy/tables"
     output.mkdir(parents=True, exist_ok=True)
-    for name in ["customer_behavior", "rfm", "rfm_transformed", "correlation_spearman", "correlation_pearson",
-                 "correlation_pairwise_counts", "correlation_column_audit", "preprocessing_trace", "scaling_parameters"]:
-        result["tables"][name].to_csv(output/f"{name}.csv", index=name.startswith("correlation_") and name not in {"correlation_column_audit"}, encoding="utf-8-sig")
+    for name in EXPORT_TABLES:
+        result["tables"][name].to_csv(output/f"{name}.csv", index=name in MATRIX_TABLES, encoding="utf-8-sig")
     metadata = {**result["metadata"], "protected_after": protected_hashes(result["project"])}
     metadata["protected_unchanged"] = metadata["protected_before"] == metadata["protected_after"]
+    metadata["table_sha256"] = {name:checksum(output/f"{name}.csv") for name in EXPORT_TABLES}
     (output.parent/"run_metadata.json").write_text(json.dumps(metadata, ensure_ascii=False, indent=2), encoding="utf-8")
+    result["metadata"] = metadata
     return output

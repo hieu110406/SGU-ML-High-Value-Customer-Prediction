@@ -53,8 +53,12 @@ def figure_inventory(project):
     for name in sorted(set(old)|current):
         path=Path(project)/"notebooks/01_eda/figures"/name
         status=("Tái tạo/thay thế" if name in old else "Tạo mới") if name in current else "Đã xóa hình cũ không dùng"
+        current_hash=checksum(path) if name in current and path.exists() else ""
+        if current_hash and old.get(name)==current_hash:
+            status="Giữ nguyên nội dung"
         rows.append(dict(name=name,status=status,old_sha256=old.get(name,""),
-                         sha256=checksum(path) if name in current and path.exists() else ""))
+                         sha256=current_hash,
+                         notebook="eda_v1.ipynb" if name in current else ""))
     return pd.DataFrame(rows)
 
 
@@ -187,15 +191,16 @@ def write_report(result):
            "9. Chưa chạy mô hình, đánh giá cụm, kiểm định nguyên nhân hoặc dự báo; các vùng trên scatter chưa là cụm chính thức.\n"
            "10. Kiểm tra hiển thị: PNG được kiểm tra trực tiếp; notebook có output đã chạy. Bản HTML có thể tạo bằng nbconvert, nhưng chưa xác nhận bố cục notebook trong trình duyệt của người dùng.\n",
            "## 14. Danh sách hình và hướng dẫn chạy lại\n",
-           "Mã được tổ chức trong `eda_analysis.py` (tính/kiểm tra), `eda_presentation.py` (vẽ/nhận xét), `eda_report.py` (báo cáo). Notebook dùng cell ngắn gọi các hàm này; toàn bộ công thức và mã nguồn ở cùng vùng EDA, có thể kiểm tra. Cả hai notebook tự đọc workbook và chạy độc lập, không đọc kết quả cache của nhau.\n",
-           "- `eda_v1.ipynb`: cấu trúc/chất lượng, đơn biến, thời gian/quốc gia, hai/đa biến, tương quan; xuất 9 CSV và báo cáo hiện tại sau kiểm tra.\n"
-           "- `eda_v2_outlier.ipynb`: tự tính lại, tập trung phân phối/ngoại lệ/RFM/scaling; không ghi đè CSV hoặc báo cáo; tái tạo có chủ đích các PNG chuyên sâu dùng chung.\n"
+           "Toàn bộ EDA nằm trong một notebook: [eda_v1.ipynb](../notebooks/01_eda/eda_v1.ipynb). Luồng đọc là **cấu trúc/chất lượng → đơn biến → thời gian/quốc gia → hai/đa biến → tương quan → ngoại lệ → đối chiếu tiền xử lý → RFM/scaling → kiểm tra/xuất báo cáo**.\n",
+           "- Đọc workbook và chạy pipeline trong bộ nhớ một lần; dùng cùng bảng khách cho mọi phép phân tích. Mỗi hình/bảng quan trọng được trình bày tại một vị trí phù hợp, không cần chạy notebook khác hoặc trao đổi cache giữa các notebook.\n"
+           "- Mã tính/kiểm tra nằm trong `eda_analysis.py`, mã vẽ/nhận xét trong `eda_presentation.py`, mã báo cáo trong `eda_report.py`. Notebook gọi bằng các cell ngắn; toàn bộ công thức và mã nguồn có thể kiểm tra.\n"
            "- Kết quả mới: `experiments/eda_current_policy/`; kết quả lịch sử giữ tại `experiments/eda_rebuild/` và `experiments/form2_manual_behavior_raw_survey/`.\n",
-           md_table(pd.DataFrame([dict(figure=f"{k}.png",section=section,title=title) for k,(section,title) in FIGURES.items()])),
+           md_table(pd.DataFrame([dict(figure=f"{k}.png",section=section,title=title,notebook="eda_v1.ipynb") for k,(section,title) in FIGURES.items()])),
            "\n### Hình cũ: thay thế, giữ lại và xóa\n",
-           "Giữ 13 tên hình cũ và tái tạo theo phạm vi mới; thêm 11 tên hình. Ba hình dư được xóa sau khi kiểm tra bộ hình mới: `customer_orders_vs_value.png` thay bằng panel sáu cặp số; `signed_line_value_by_country.png` gộp vào hình quốc gia bốn chỉ tiêu; `raw_transaction_histograms_p01_p99.png` thay bằng histogram/boxplot toàn miền symlog. Không có hình nhị phân cũ nào được giữ nguyên không kiểm tra. Không xóa hình ngoài EDA. Chi tiết SHA256 trong [kiểm kê hình](../experiments/eda_current_policy/figure_inventory.csv).\n",
+           "Bộ 24 PNG được giữ lại và trình bày đúng một lần trong notebook duy nhất. Kiểm kê so SHA256 với HEAD trong [figure_inventory.csv](../experiments/eda_current_policy/figure_inventory.csv). Gộp notebook không làm mất hình hoặc nội dung phân tích.\n",
            "### Môi trường và cách chạy\n\nTừ gốc repository, chọn môi trường có requirements cùng nbformat, nbclient, nbconvert, ipykernel, Pillow. Môi trường đã có tại `project/.venv-eda/`; môi trường Python mặc định có thể không đủ thư viện. Trong Jupyter chọn đúng kernel rồi Restart Kernel → Run All.\n",
-           "```powershell\n& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb\n& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v2_outlier.ipynb\n```\n",
+           "```powershell\n& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb\n```\n",
+           "Xuất 9 CSV kết quả cần bàn giao cùng metadata SHA256. Các bảng mô tả giao dịch/khách và mẫu cực trị được tính, kiểm tra và hiển thị trực tiếp trong notebook; không xuất thêm bản cache của chúng.\n",
            "Notebook tự tìm project từ thư mục làm việc trong repository, không dùng đường dẫn máy tác giả. Mỗi notebook có kiểm tra khóa/tổng/công thức/thiếu, mọi cặp tương quan được đối chiếu scipy, và SHA256 đầu vào trước/sau. Báo cáo dùng cùng bảng/nhận xét đã tính nên khi dữ liệu/chính sách đổi, chạy lại v1 sẽ cập nhật số và diễn giải; không sửa tay kết quả. Ngày/múi giờ nguồn không bị chuyển.\n",
            "### Dấu vết tái lập\n",
            md_table(pd.DataFrame([(k,str(meta[k])) for k in ["run_at","client_date","timezone","git_head","window_start","reference_date_exclusive","source_timestamp_timezone","python"]]+[("version."+k,v) for k,v in meta["versions"].items()],columns=["Trường","Giá trị"])),

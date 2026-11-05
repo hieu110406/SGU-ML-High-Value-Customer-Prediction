@@ -1,4 +1,7 @@
-"""Tiền xử lý Online Retail II cho bài toán phân cụm khách hàng RFM.
+"""Mã tiền xử lý đang chờ nhóm rà soát cho raw Online Retail của dự án.
+
+Các hàm clean hiện dùng tên cột nội bộ Invoice/Price/Customer ID, chưa tương thích
+trực tiếp với schema raw InvoiceNo/UnitPrice/CustomerID và chưa được phê duyệt.
 """
 from __future__ import annotations
 
@@ -7,7 +10,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-RAW_PATH = Path("data/raw/online_retail_II.xlsx")
+RAW_PATH = Path(__file__).resolve().parents[1] / "data/raw/Online Retail.xlsx"
 PROCESSED_DIR = Path("data/processed")
 
 
@@ -20,7 +23,7 @@ OUTLIER_K = 3.0
 
 
 def load_raw(path: Path | str = RAW_PATH) -> pd.DataFrame:
-    """Đọc cả 2 sheet của file Excel rồi gộp lại."""
+    """Đọc workbook vào bộ nhớ; raw hiện tại có một sheet và chưa được làm sạch."""
     sheets = pd.read_excel(path, sheet_name=None, engine="openpyxl")
     return pd.concat(sheets.values(), ignore_index=True)
 
@@ -37,8 +40,11 @@ def outlier_mask(df: pd.DataFrame, cols=OUTLIER_COLS, k: float = OUTLIER_K) -> p
 
 
 def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Làm sạch toàn bộ dữ liệu. Trả về `(clean, log_df)`."""
-    log: list[tuple[str, int]] = [("Dữ liệu gốc (đã gộp 2 sheet)", len(raw))]
+    """Chính sách thử nghiệm cũ, chưa phê duyệt cho raw của dự án."""
+    if {"InvoiceNo", "UnitPrice", "CustomerID"}.issubset(raw.columns):
+        raise ValueError("clean_data chưa tương thích schema raw InvoiceNo/UnitPrice/CustomerID; "
+                         "nhóm cần thống nhất chính sách và cập nhật pipeline trước khi chạy.")
+    log: list[tuple[str, int]] = [("Dữ liệu nguồn đầu vào", len(raw))]
     df = raw.copy()
 
    

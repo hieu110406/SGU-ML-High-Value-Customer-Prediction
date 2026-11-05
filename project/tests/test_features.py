@@ -1,4 +1,4 @@
-"""Dữ liệu nhỏ TỰ TẠO CHỈ ĐỂ KIỂM THỬ; không phải kết quả Online Retail II."""
+"""Dữ liệu nhỏ tự tạo chỉ để kiểm thử; không phải kết quả từ raw dự án."""
 
 import unittest
 

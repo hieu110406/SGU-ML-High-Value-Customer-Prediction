@@ -1,5 +1,11 @@
 # Form 2 — Đặc trưng hành vi mua thủ công
 
+> **Không sử dụng số liệu khảo sát trong tài liệu này:** Phần số liệu và CSV Form 2
+> bên dưới được tính từ dữ liệu từng chọn nhầm, không hợp lệ cho dự án và không phải
+> nguồn dữ liệu của dự án. Raw duy nhất là `data/raw/Online Retail.xlsx`. Giữ nội dung
+> để tác giả đối chiếu công việc; cần tính lại trước khi sử dụng bất kỳ kết quả nào.
+> Notebook cũ và các lệnh chạy liên quan không còn sử dụng được.
+
 **Mốc chính sách của báo cáo:** các kết quả làm sạch, khảo sát khách hàng và RFM trong bản EDA này dùng chính sách tại commit `1c7ce32`. `main` đã có thay đổi tiền xử lý tại commit `d17492d`; các con số ở đây chưa đánh giá chính sách mới đó. Notebook giữ mã tái hiện chính sách cũ ngay trong một ô riêng để chạy độc lập, không sửa hoặc gọi API cũ đã bị xóa khỏi `src/preprocessing.py`. Các mô tả “hiện tại/current” trong kết quả đã lưu được hiểu tại mốc `1c7ce32`.
 
 **Ngô Nguyên — 3124411191 — Nhóm 15.** Phạm vi: hành vi trước RFM;
@@ -9,13 +15,10 @@ Tài liệu này mô tả API đặc trưng trong `src/features.py` và lưu b�
 Form 2 trước đây. Các bảng kèm Form 2 là **khảo sát thử nghiệm từ bản sao dữ liệu
 thô**, không phải đầu ra tiền xử lý hoặc bảng đặc trưng chính thức.
 
-**Cập nhật sau khi làm lại EDA:** khảo sát hành vi đã được tích hợp vào
-`notebooks/01_eda/eda_v1.ipynb`; mở notebook và chọn **Restart Kernel → Run All**.
-Phần ngoại lệ, RFM và scaling đã gộp vào cùng notebook này; chỉ cần chạy một file,
-không dùng notebook phụ hoặc cache trao đổi. Xem [hướng dẫn EDA](../notebooks/01_eda/README.md).
-Xem [báo cáo EDA hiện tại](bao_cao_qua_trinh_eda.md) để biết kết quả đối chiếu
-pipeline và phạm vi dữ liệu mới. API đặc trưng và các bảng khảo sát lịch sử vẫn
-được giữ để sử dụng, kiểm thử và đối chiếu; mã tiền xử lý của Thuận không thay đổi.
+**Phạm vi hiện tại:** xem [hướng dẫn EDA](../notebooks/01_eda/README.md) và
+[báo cáo EDA](bao_cao_eda_raw_moi.md), được tính từ raw duy nhất. Mô tả API và
+ví dụ tổng quát bên dưới được giữ để tác giả rà soát; chúng chưa xác nhận rằng
+pipeline hoặc bộ đặc trưng chính thức đã sẵn sàng cho raw của dự án.
 
 ## Giao diện
 
@@ -86,7 +89,7 @@ from src.features import build_customer_behavior_features
 
 features = build_customer_behavior_features(
     purchase_transactions,
-    window_start="2009-12-01", reference_date="2011-12-10",
+    window_start="2010-12-01", reference_date="2011-12-10",
     stock_code_roles=reviewed_stock_code_roles,
     invoice_time_policy="earliest",  # chỉ chọn sau khi thống nhất quy tắc
     include_optional=False,
@@ -96,10 +99,10 @@ assert features["Customer ID"].is_unique
 
 ## Hoàn trả: cần giữ gì trước khi loại chứng từ?
 
-Giữ một góc nhìn riêng các dòng **có C hoặc Quantity < 0 hoặc Price <= 0** để
-đối chiếu nghiệp vụ; không chỉ giữ các dòng C, vì EDA đã thấy lượng âm không có C
-và C có lượng không âm. Giữ `Customer ID`, Invoice, StockCode, Description,
-Quantity, Price, InvoiceDate, sheet và số dòng nguồn. Các trường liên kết hóa đơn mua gốc,
+Giữ một góc nhìn riêng các dòng **có C hoặc Quantity < 0 hoặc UnitPrice <= 0** để
+đối chiếu nghiệp vụ; EDA trên raw duy nhất thấy 1.336 dòng Quantity âm không có C.
+Giữ CustomerID, InvoiceNo, StockCode, Description,
+Quantity, UnitPrice, InvoiceDate, sheet và số dòng nguồn. Các trường liên kết hóa đơn mua gốc,
 loại sự kiện (hủy/hoàn/điều chỉnh), lượng hoàn xác minh và trạng thái xác minh cần
 được bổ sung từ đối chiếu; **không giả định chúng đã có trong workbook**.
 Nguồn thô giữ nguyên hiện vẫn cho phép tái lập góc nhìn này sau khi lọc bảng mua.
@@ -119,7 +122,9 @@ mua thành công. Dòng thiếu khách hàng được thống kê trong `DataFra
 gán về một khách hàng chung. Bảng C là góc nhìn riêng, không bị mất khi lọc bảng mua;
 `c_document_share` không thay thế `return_rate` và không mặc định đưa vào mô hình.
 
-## Bảng khảo sát lịch sử và cách chạy hiện tại
+## Bảng khảo sát không hợp lệ: chỉ giữ để tác giả đối chiếu
+
+**Không dùng các CSV và số liệu bên dưới cho dự án.** Chúng chưa được tính lại từ raw duy nhất.
 
 Các file trong `experiments/form2_manual_behavior_raw_survey/`:
 
@@ -156,7 +161,7 @@ Khách `10001` có 5 dòng nhưng 3 đơn giá trị 28, 24, 4 GBP: AOV = 56/3,
 3 mã sản phẩm, lượng sản phẩm = 10, lượng/đơn = 10/3 và khoảng cách trung bình = 5,5 ngày.
 Khách `10002` có 1 dòng/1 đơn, khoảng cách là `NaN`. Các con số này **không phải kết quả dữ liệu thật**.
 
-Lần chạy khảo sát thực tế với cửa sổ `[2009-12-01, 2011-12-10)` đã kiểm tra:
+Lần khảo sát không hợp lệ cho dự án, với cửa sổ `[2009-12-01, 2011-12-10)`, từng ghi:
 805.549 dòng mua ứng viên, 36.969 mã hóa đơn, **5.878 dòng khách hàng duy nhất**.
 Có 1.623 khách hàng chỉ có 1 hóa đơn nên khoảng cách là `NaN`; 89 khách hàng còn
 mã hàng chưa phân loại nên các chỉ số sản phẩm chưa xác định. `return_rate` là `NaN`

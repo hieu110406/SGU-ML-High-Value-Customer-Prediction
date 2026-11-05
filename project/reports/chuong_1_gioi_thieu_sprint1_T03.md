@@ -4,10 +4,10 @@
 **Người thực hiện phần T03:** Ngô Nguyên — MSSV 3124411191  
 **Giai đoạn:** Bản thảo Sprint 1, 02–03/11/2026; tiếp tục hoàn thiện trong Sprint 2.
 
-> Phạm vi bản thảo: giới thiệu bài toán, dữ liệu đã kiểm tra và phương pháp dự kiến.
-> EDA v1 đã được thực thi trên tệp của repository. Các bước tạo RFM, phân cụm,
-> đánh giá mô hình và ứng dụng demo chưa được triển khai trong bộ khung được kiểm tra;
-> nội dung liên quan trong chương này là kế hoạch, không phải kết quả thực nghiệm.
+> Phạm vi bản thảo: giới thiệu bài toán, raw duy nhất đã kiểm tra và phương pháp dự kiến.
+> Raw của dự án là `data/raw/Online Retail.xlsx`; các kết quả từ dữ liệu từng chọn nhầm
+> không hợp lệ. Chưa có kết quả RFM/phân cụm được xác minh từ raw này; các bước liên quan
+> trong chương là kế hoạch, không phải kết quả thực nghiệm.
 
 ## 1.1. Bối cảnh và lý do chọn đề tài
 
@@ -25,9 +25,9 @@ và nhóm cần theo dõi mức độ quay lại. Các nhóm chỉ có ý nghĩa
 được đối chiếu với mục tiêu và quy tắc nghiệp vụ. Một cụm có mức chi tiêu cao
 không tự động đồng nghĩa với lợi nhuận cao hoặc giá trị dài hạn cao.
 
-Đề tài lựa chọn Online Retail II vì bộ dữ liệu có các trường giao dịch cần thiết
+Đề tài sử dụng Online Retail vì bộ dữ liệu có các trường giao dịch cần thiết
 để liên kết hoạt động mua với mã khách hàng và thời gian. Theo
-[mô tả của UCI](https://archive.ics.uci.edu/dataset/502/online+retail+ii), dữ liệu
+[mô tả của UCI](https://archive.ics.uci.edu/dataset/352/online+retail), dữ liệu
 đến từ một nhà bán lẻ trực tuyến đăng ký tại Anh và đơn giá được ghi bằng GBP.
 Trong dự án này, số liệu phân tích được tính trực tiếp từ tệp Excel lưu trong repository.
 
@@ -48,10 +48,9 @@ Một dòng dữ liệu không phải một khách hàng và cũng không phải
 hoàn chỉnh: nhiều dòng mặt hàng có thể thuộc một hóa đơn, còn một khách hàng
 có thể phát sinh nhiều hóa đơn.
 
-**Đầu vào** là tệp `data/raw/online_retail_II.xlsx`, gồm các cột `Invoice`,
-`StockCode`, `Description`, `Quantity`, `InvoiceDate`, `Price`, `Customer ID`
-và `Country`. Việc gộp hai sheet được thực hiện sau kiểm tra cấu trúc và kiểu
-dữ liệu tương thích. Những dòng thiếu mã khách hàng, hóa đơn hủy, giá trị không
+**Đầu vào duy nhất** là tệp `data/raw/Online Retail.xlsx`, sheet `Online Retail`,
+gồm `InvoiceNo`, `StockCode`, `Description`, `Quantity`, `InvoiceDate`, `UnitPrice`,
+`CustomerID` và `Country`. Những dòng thiếu mã khách hàng, hóa đơn hủy, giá trị không
 dương và dòng trùng là vấn đề cần xử lý có quy tắc, không phải dữ liệu được mặc
 định loại bỏ ngay khi đọc.
 
@@ -92,45 +91,40 @@ phân tích và khả năng tái lập, chưa đặt ra cam kết hiệu quả k
 5. Dự kiến trực quan hóa kết quả, đối chiếu độ nhạy với chính sách tiền xử lý
    và tổng hợp các giới hạn khi nhận diện nhóm khách hàng giá trị cao.
 
-Tại thời điểm bàn giao T03, mục tiêu khám phá dữ liệu ban đầu được thể hiện
-trong [notebook EDA v1](../notebooks/01_eda/eda_v1.ipynb). Các mục tiêu còn lại
-là hướng thực hiện tiếp theo và chưa có kết quả mô hình để báo cáo.
+Khám phá dữ liệu hiện được thể hiện trong [notebook EDA](../notebooks/01_eda/eda_raw_moi.ipynb).
+Các mục tiêu còn lại là hướng thực hiện tiếp theo; chưa có kết quả mô hình được
+xác minh từ raw duy nhất để báo cáo.
 
 ## 1.4. Đối tượng và phạm vi nghiên cứu
 
 ### 1.4.1. Đối tượng nghiên cứu
 
 Đối tượng nghiên cứu là hành vi giao dịch được ghi nhận của khách hàng trong
-Online Retail II và các nhóm khách hàng có thể hình thành từ đặc trưng RFM.
+Online Retail và các nhóm khách hàng có thể hình thành từ đặc trưng RFM.
 Đơn vị dữ liệu đầu vào là dòng hóa đơn; đơn vị dự kiến phân cụm là khách hàng
 có mã định danh đáp ứng quy tắc được nhóm thống nhất.
 
 ### 1.4.2. Phạm vi dữ liệu đã kiểm tra
 
-EDA v1 sử dụng cả hai sheet của tệp gốc, có cùng 8 cột và kiểu dữ liệu tương thích:
+Raw duy nhất có một sheet và được đọc trực tiếp để kiểm kê:
 
 | Sheet | Số dòng dữ liệu | Số cột | Thời điểm đầu | Thời điểm cuối |
 |---|---:|---:|---|---|
-| Year 2009-2010 | 525.461 | 8 | 2009-12-01 07:45:00 | 2010-12-09 20:01:00 |
-| Year 2010-2011 | 541.910 | 8 | 2010-12-01 08:26:00 | 2011-12-09 12:50:00 |
+| Online Retail | 541.909 | 8 | 2010-12-01 08:26:00 | 2011-12-09 12:50:00 |
 
-Workbook có tổng cộng **1.067.371 dòng và 8 cột nguồn**,
-trong khoảng **2009-12-01 07:45:00 đến 2011-12-09 12:50:00**. Theo quy tắc hình thức
-nguyên dương có 5 chữ số, quan sát được **5.942 mã khách hàng**;
-toàn bộ nguồn có **53.628 mã hóa đơn duy nhất** (gồm chứng từ hủy/điều chỉnh)
-và **43 nhãn quốc gia**. Đây là thống kê phạm vi dữ liệu thô,
+Workbook có **541.909 dòng và 8 cột nguồn**,
+trong khoảng **2010-12-01 08:26:00 đến 2011-12-09 12:50:00**. Quan sát được
+**4.372 mã khách hàng**, **25.900 mã chứng từ duy nhất** (gồm chứng từ C)
+và **38 nhãn quốc gia**. Đây là thống kê phạm vi dữ liệu thô,
 chưa phải quy mô tập huấn luyện hoặc số khách hàng sau tiền xử lý.
 
-Hai sheet có thời gian chồng lấn. EDA phát hiện **22.202
-mẫu dòng giống hệt nhau xuất hiện ở nhiều sheet** và **34.335
-dòng trùng dư trên 8 cột nguồn** trong toàn workbook. Các dòng này được giữ
-trong EDA v1 và ghi nhận để nhóm quyết định chính sách, tránh ngầm coi việc
-gộp sheet là đã làm sạch. Có **243.007 dòng thiếu Customer ID**;
+EDA phát hiện **5.268 dòng trùng dư trên 8 cột nguồn**. Các dòng này được giữ
+trong khảo sát và ghi nhận để nhóm quyết định chính sách. Có **135.080 dòng thiếu CustomerID**;
 không thể tự gán các dòng này về một khách hàng đã biết chỉ từ dữ liệu hiện có.
 
 ### 1.4.3. Giới hạn nghiên cứu
 
-Phạm vi thời gian nêu trên là lịch sử giao dịch giai đoạn 2009–2011, không phải
+Phạm vi thời gian nêu trên là lịch sử giao dịch giai đoạn 12/2010–12/2011, không phải
 hoạt động kinh doanh năm 2026. Tháng cuối chỉ có quan sát đến ngày 09/12/2011,
 nên mức giao dịch tháng đó không thể được so trực tiếp với một tháng đầy đủ.
 Thông tin múi giờ không có trong workbook; EDA giữ thời gian nguồn.
@@ -140,9 +134,9 @@ hay toàn bộ hành vi ngoài giao dịch. Vì vậy, Monetary dự kiến bi�
 giao dịch theo chính sách đã chốt, không phải lợi nhuận hoặc giá trị vòng đời
 được xác thực. Các mã hàng có thể bao gồm bút toán dịch vụ/điều chỉnh nên cần
 phân loại trước khi diễn giải tất cả là hàng hóa. Giá trị âm hoặc cực lớn cần
-xét ngữ cảnh nghiệp vụ; EDA v1 chưa áp dụng chính sách xóa ngoại lai.
+xét ngữ cảnh nghiệp vụ; EDA chưa áp dụng chính sách xóa ngoại lai.
 
-Phạm vi của T03 trong Sprint 1 là notebook EDA v1 và bản thảo Chương 1.
+Phạm vi phân tích hiện tại là notebook EDA và bản thảo Chương 1.
 Các công việc tiền xử lý, tạo RFM, mô hình hóa, đánh giá và ứng dụng demo
 thuộc bước tiếp theo theo phân công của nhóm; bản thảo này không coi chúng
 là sản phẩm đã hoàn thành. Kế hoạch chi tiết và tiêu chí nghiệm thu các bước
@@ -153,13 +147,13 @@ là sản phẩm đã hoàn thành. Kế hoạch chi tiết và tiêu chí nghi�
 Quy trình dự kiến đi từ xác minh dữ liệu đến tạo biểu diễn khách hàng,
 thử nghiệm phân cụm, đánh giá và diễn giải. Trạng thái của từng bước được phân biệt như sau:
 
-1. **Kiểm tra nguồn và khám phá ban đầu — đã thực hiện trong T03.**
-   Đọc toàn bộ sheet, kiểm tra khả năng gộp, thống kê cấu trúc/chất lượng,
+1. **Kiểm tra nguồn và khám phá ban đầu — đã thực hiện trên raw duy nhất.**
+   Đọc sheet `Online Retail`, thống kê cấu trúc/chất lượng,
    tính mô tả số và phân tích số hóa đơn theo tháng/quốc gia. Phép đếm hóa đơn
-   sử dụng mã duy nhất thay vì số dòng. Tạo `Quantity × Price` chỉ để khảo sát
+   sử dụng mã duy nhất thay vì số dòng. Tạo `Quantity × UnitPrice` chỉ để khảo sát
    giá trị đại số của dòng; dữ liệu gốc được giữ nguyên.
 2. **Tiền xử lý — dự kiến.** Thống nhất cách xử lý mã khách hàng thiếu,
-   dòng trùng trong và giữa sheet, hóa đơn hủy, lượng/giá không dương,
+   dòng trùng, hóa đơn hủy, lượng/giá không dương,
    mã dịch vụ và ngoại lai. Mỗi điều kiện cần có số dòng bị ảnh hưởng và
    lý do nghiệp vụ; chưa mặc định rằng mọi dòng có dấu hiệu bất thường phải xóa.
 3. **Tạo đặc trưng RFM — dự kiến.** Chốt ngày tham chiếu sau cửa sổ quan sát;
@@ -225,15 +219,15 @@ cần nhóm xác nhận** trước khi ghép báo cáo chung:
 
 ## Nguồn đối chiếu và các điểm cần nhóm xác nhận
 
-- Chen, D. (2012). *Online Retail II* [Dataset]. UCI Machine Learning Repository.
-  [https://doi.org/10.24432/C5CG6D](https://doi.org/10.24432/C5CG6D).
-  Dùng để đối chiếu bối cảnh và quy ước biến; các số đếm trong chương tính từ Excel cục bộ.
+- Chen, D. *Online Retail* [Dataset]. UCI Machine Learning Repository.
+  [https://doi.org/10.24432/C5BW33](https://doi.org/10.24432/C5BW33).
+  Dùng để đối chiếu bối cảnh và quy ước biến; các số đếm trong chương tính từ raw duy nhất.
 - [README dự án](../README.md), [requirements.txt](../requirements.txt),
   thư mục `src/`, `configs/` và các notebook hiện có: căn cứ cho trạng thái
   triển khai và các hướng phương pháp; chưa có kế hoạch chi tiết hoàn chỉnh.
-- [EDA v1, mục 2–10](../notebooks/01_eda/eda_v1.ipynb): phạm vi từng sheet,
-  chất lượng, phép đếm và kiểm tra nhất quán. SHA256 nguồn:
-  `bcbe73b35f5b7babf197fb0cb983a11f5d9ff929078d4aa53d171b1f2df2e980`.
+- [EDA từ raw duy nhất](../notebooks/01_eda/eda_raw_moi.ipynb): cấu trúc,
+  chất lượng, phép đếm và kiểm tra nhất quán. SHA-256 nguồn:
+  `43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d`.
 
 Trước Sprint 2, nhóm cần xác nhận đề cương 5 chương; tiêu chí khách hàng giá trị cao;
 chính sách trùng, hoàn/hủy và ngoại lai; định nghĩa RFM/cửa sổ/ngày tham chiếu;

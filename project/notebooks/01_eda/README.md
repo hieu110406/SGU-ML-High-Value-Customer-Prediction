@@ -1,64 +1,97 @@
-﻿# EDA trong một notebook duy nhất
+# EDA từ raw hiện tại — điểm vào và cách chạy
 
-Mở [eda_v1.ipynb](eda_v1.ipynb) để chạy toàn bộ EDA của dự án phân cụm khách hàng.
-Notebook đọc workbook và chạy pipeline trong bộ nhớ một lần, dùng cùng bảng dữ liệu
-cho mọi phân tích; không cần notebook ngoại lệ riêng hoặc cache trao đổi giữa notebook.
+Mở **[eda_raw_moi.ipynb](eda_raw_moi.ipynb)** cho raw duy nhất của dự án:
+`project/data/raw/Online Retail.xlsx`. Kết quả từng tính từ dữ liệu chọn nhầm
+không hợp lệ cho dự án.
 
-## Thứ tự nội dung
+## Nguồn và phạm vi
 
-0. Thiết lập, phạm vi và cách chạy.
-1. Nguồn, cấu trúc và đơn vị quan sát.
-2. Chất lượng dữ liệu.
-3. Phân tích đơn biến giao dịch và khách hàng.
-4. Thời gian.
-5. Quốc gia.
-6. Num vs Num, Num vs Cat, Cat vs Cat.
-7. Phân tích đa biến.
-8. Tương quan Spearman/Pearson và số quan sát theo cặp.
-9. IQR giao dịch/khách hàng và mẫu cực trị.
-10. Đối chiếu tiền xử lý trước/sau.
-11. RFM, log1p và scaling thử nghiệm.
-12. Kiểm tra, xuất kết quả và báo cáo.
-13. Tổng hợp phát hiện, giới hạn và quyết định cần xác nhận.
+- Mô tả nguồn: [UCI Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail),
+  đã đối chiếu ngày 05/11/2026. Đơn giá GBP dựa trên mô tả nguồn; múi giờ không được cung cấp.
+- Raw local: 23.715.344 byte, sheet `Online Retail`, **541.909 dòng × 8 cột**;
+  01/12/2010 08:26–09/12/2011 12:50, 25.900 chứng từ và 4.372 mã khách.
+- SHA-256: `43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d`.
+- Số liệu luôn tính lại từ workbook. Bộ đọc dừng nếu số sheet/schema đổi, không đọc processed/bảng cũ.
+- Bản sao EDA chuyển ID thành chuỗi, strip khoảng trắng ở ID/Country; CustomerID bỏ
+  hậu tố `.0` do Excel đọc số có thiếu. Description giữ nguyên chuỗi. Raw không sửa byte nào.
 
-Giữ **24 hình riêng biệt**, mỗi hình trình bày một lần; thống kê đơn biến và
-bảng ngưỡng IQR có vai trò riêng. Phần ngoại lệ liên kết đến hình phân phối đã có,
-không vẽ lại. Bộ đọc dữ liệu, tạo đặc trưng và fit scaler cũng chỉ thực hiện một lần.
+Tập mua **khảo sát tạm thời**: InvoiceNo và CustomerID có mã, InvoiceDate hợp lệ,
+không có tiền tố C, Quantity > 0 và UnitPrice > 0, cả hai số hữu hạn.
+Giữ trùng và mã dịch vụ; không áp quy tắc clean chính thức. Gap dùng min timestamp
+của từng hóa đơn, khách một hóa đơn giữ NaN. Recency dùng nửa đêm kế tiếp ngày cuối raw,
+không dùng ngày chạy. Công thức đầy đủ trong notebook và bảng `aggregation_formulas` của workbook.
 
 ## Chạy lại
 
-Chọn đúng kernel theo requirements và dùng **Restart Kernel → Run All**.
-Môi trường hiện có `project/.venv-eda/` đã đủ thư viện. Từ gốc repository:
+Từ gốc repository, dùng môi trường EDA đã có:
 
 ```powershell
-& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb
+& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_raw_moi.ipynb
 ```
 
-Thư viện: requirements của dự án cùng nbformat, nbclient, nbconvert, ipykernel, Pillow.
-Notebook tự tìm project trong repository; không có đường dẫn máy tác giả.
+Hoặc mở notebook, chọn kernel Python của môi trường EDA và **Restart Kernel → Run All**.
+Notebook tìm project theo đường dẫn tương đối; không phụ thuộc đường dẫn máy tác giả.
+Nếu cần tạo môi trường mới (Python 3.12+), từ gốc repository:
 
-## Mã và kết quả
+```powershell
+python -m venv project/.venv-eda
+& project/.venv-eda/Scripts/python.exe -m pip install -r project/requirements.txt nbformat nbclient nbconvert ipykernel Pillow
+```
 
-- `eda_analysis.py`: đọc/kiểm kê, tạo bảng khách/RFM, thống kê và kiểm tra công thức.
-- `eda_presentation.py`: mã vẽ và nhận xét từ số liệu thực thi.
-- `eda_report.py`: tạo báo cáo 0–14 và kiểm kê hình.
-- Hình: `notebooks/01_eda/figures/`.
-- 9 CSV: `experiments/eda_current_policy/tables/`, gồm customer_behavior, rfm,
-  rfm_transformed, scaling_parameters, preprocessing_trace và 4 bảng tương quan/kiểm kê cột.
-- Metadata/checksum: `run_metadata.json`; kiểm kê hình: `figure_inventory.csv` trong cùng thư mục thực nghiệm.
-- [Báo cáo EDA](../../reports/bao_cao_qua_trinh_eda.md) được cập nhật từ kết quả đã kiểm tra.
+Phiên bản thực chạy ghi trong sheet `Metadata`. Không cần mạng/API khi phân tích.
+Thời gian đọc Excel/vẽ có thể vài phút. Chạy lại sẽ ghi đè **kết quả EDA** bên dưới.
+Muốn lưu một lần chạy làm lịch sử, sao lưu cả thư mục kết quả/hình/notebook/báo cáo trước khi chạy tiếp.
 
-Bảng mô tả giao dịch/khách, IQR và mẫu cực trị nằm trong output và biến analysis['tables'];
-không xuất thêm CSV cache. Các kiểm tra tích hợp xác minh khóa, tổng, AOV/gap,
-RFM, mọi hệ số tương quan/n, scaling và SHA256 nguồn/mã trước/sau.
+Sau khi thực thi notebook, kiểm tra lại đầu ra và đối chiếu với profile raw độc lập đã lưu:
 
-## Phạm vi
+```powershell
+& project/.venv-eda/Scripts/python.exe -X utf8 project/experiments/eda_raw_moi/verification/validate_independent.py
+& project/.venv-eda/Scripts/python.exe -X utf8 project/experiments/eda_raw_moi/verification/verify_delivery.py
+```
 
-Cửa sổ [2009-12-01, 2011-12-10); giờ nguồn chưa có múi giờ. Gọi nguyên trạng clean_data
-của Thuận trong bộ nhớ; Guest được tách khỏi khảo sát khách sau pipeline. Raw, processed,
-module src và bảng EDA/Form 2 lịch sử được giữ nguyên.
+Lệnh kiểm tra độc lập đọc lại raw trực tiếp và ghi các đối chiếu vào sheet `Kiem_chung_doc_lap`;
+lệnh kiểm tra bàn giao ghi trạng thái vào sheet `Kiem_tra_ban_giao` của cùng workbook.
+Các lệnh không tạo CSV hay JSON.
 
-F = n_orders; M = tổng Q×P chính xác. Gap của khách một đơn giữ NaN; các chỉ số sản phẩm/
-hoàn trả chưa xác minh không điền 0. Ngưỡng IQR1.5 của EDA chỉ gắn cờ điều tra, khác
-bộ lọc log-IQR k=3 sẵn có trong pipeline; không tự xóa thêm khách giá trị cao.
-Kết quả hành vi/RFM/scaling còn thử nghiệm, cần Thuận/nhóm trưởng xác nhận chính sách.
+## Thứ tự và đầu ra
+
+0. Bối cảnh, đơn vị dòng/chứng từ/khách và câu hỏi.
+1. Kiểm kê raw, sheet, schema, dtypes, mẫu đầu/cuối, SHA-256.
+2. Thiếu, trùng, C, dấu lượng/giá, định danh và mẫu bất thường.
+3. Thống kê số, danh mục, phân vị/IQR, mẫu cực trị.
+4. Đơn biến, top quốc gia/mã hàng, giữ số âm/0/cực trị.
+5. Thời gian và hành vi khách tạm, gap thiếu cho khách một đơn.
+6. Hai biến, phân loại–phân loại và đa biến có seed.
+7. Pearson/Spearman và n theo cặp, tách cấp dòng/cấp khách, loại ID.
+8. Phương án sau EDA, chưa chốt hay áp dụng.
+9. Kiểm tra, xuất bảng/hình/metadata và báo cáo cùng số liệu.
+
+| Thành phần hiện dùng | Đường dẫn từ project/ |
+|---|---|
+| Notebook có output | `notebooks/01_eda/eda_raw_moi.ipynb` |
+| Tính toán, vẽ và xuất báo cáo | `notebooks/01_eda/eda_raw_analysis.py` |
+| Dựng cấu trúc notebook | `notebooks/01_eda/build_eda_raw_notebook.py` |
+| Hình mới | `notebooks/01_eda/figures/raw/` |
+| Thống kê, danh mục, metadata, kiểm tra | [ket_qua_eda.xlsx](../../experiments/eda_raw_moi/ket_qua_eda.xlsx) |
+| Báo cáo EDA mới | [bao_cao_eda_raw_moi.md](../../reports/bao_cao_eda_raw_moi.md) |
+| Phương án chờ nhóm | [de_xuat_sau_eda.md](../../reports/de_xuat_sau_eda.md) |
+| Kiểm kê nguồn | [kiem_ke_eda_raw_moi.md](../../reports/kiem_ke_eda_raw_moi.md) |
+
+Mỗi hình có nguồn/hash, n hiển thị, bộ lọc, đơn vị, bảng bằng chứng và nhận xét 5 ý.
+Ma trận dùng toàn bộ cặp hữu hạn, không impute; scatter đa biến có seed 1505, tối đa 2.000 khách.
+Log/symlog chỉ là tọa độ hiển thị; chưa fit scaler/encoder hay mô hình.
+Chỉ xuất thống kê/mẫu audit, không xuất giao dịch sạch hoặc bộ feature theo khách.
+
+Chỉ chạy `build_eda_raw_notebook.py` khi sửa cấu trúc trình bày; script sẽ xóa output
+của notebook mới, cần thực thi notebook từ đầu sau đó. Metadata ghi hash mã/cell source,
+thời gian Asia/Bangkok, git HEAD và trạng thái cây làm việc.
+
+## Các phần việc chưa hợp lệ với raw duy nhất
+
+Các sản phẩm trong `data/processed/` và khảo sát Form 2 được giữ để tác giả đối chiếu,
+nhưng số liệu tính từ dữ liệu chọn nhầm không hợp lệ và không dùng cho dự án.
+Notebook và API tiền xử lý hiện có chưa tương thích trực tiếp schema raw; cần nhóm
+thống nhất chính sách trước khi cập nhật hoặc chạy cleaning.
+
+Các quyết định thiếu mã/mô tả, trùng, hủy/trả, giá 0/âm, mã dịch vụ, ngoại lệ, cửa sổ,
+encoding/scaling và tập biến đều **chờ nhóm thống nhất**, xem tài liệu đề xuất.

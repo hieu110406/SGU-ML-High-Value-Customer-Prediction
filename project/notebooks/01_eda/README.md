@@ -1,54 +1,76 @@
-# Chạy từng notebook EDA độc lập
+# Chạy lại EDA theo mã tiền xử lý hiện tại
 
-**Mốc chính sách của báo cáo:** các kết quả làm sạch, khảo sát khách hàng và RFM trong bản EDA này dùng chính sách tại commit `1c7ce32`. `main` đã có thay đổi tiền xử lý tại commit `d17492d`; các con số ở đây chưa đánh giá chính sách mới đó. Notebook giữ mã tái hiện chính sách cũ ngay trong một ô riêng để chạy độc lập, không sửa hoặc gọi API cũ đã bị xóa khỏi `src/preprocessing.py`. Các mô tả “hiện tại/current” trong kết quả đã lưu được hiểu tại mốc `1c7ce32`.
+EDA phục vụ **phân cụm khách hàng không giám sát**. Các bảng hành vi, RFM và scaling
+là **thử nghiệm theo mã hiện tại**, chưa có căn cứ xác nhận nhóm đã phê duyệt chính sách.
+Báo cáo cũ tại chính sách `1c7ce32` và đầu ra processed đã lưu có phạm vi khác;
+không trộn các số cũ với lần chạy mới.
 
-Mở notebook bằng Jupyter, chọn môi trường Python có đủ thư viện rồi chọn
-**Restart Kernel → Run All**. Mỗi notebook tự đọc dữ liệu và tính lại phần của mình;
-không cần chạy notebook khác trước hoặc dùng script Python hỗ trợ EDA.
+Mỗi notebook tự đọc `data/raw/online_retail_II.xlsx`, gọi nguyên trạng
+`src.preprocessing.clean_data` trong bộ nhớ rồi tạo tập khảo sát khách có ID.
+Pipeline vẫn giữ Guest theo mã của Thuận; EDA loại Guest **sau** pipeline khi tổng hợp khách.
+Không thay đổi mã thành viên khác, workbook, processed, Form 2 hoặc các bảng EDA cũ.
+Không chạy notebook tiền xử lý có cell ghi processed.
 
-- `eda_v1.ipynb`: cấu trúc, chất lượng dữ liệu, đối chiếu pipeline, thời gian,
-  quốc gia, hành vi, thống kê ngoại lệ và RFM thử nghiệm. Các bảng kiểm tra giữ trong
-  notebook; chỉ xuất 3 CSV bàn giao vào `experiments/eda_rebuild/tables/` và PNG, không tạo JSON.
-- `eda_v2_outlier.ipynb`: tự đọc workbook, chạy pipeline trong bộ nhớ rồi tính
-  phân phối, ngoại lệ và RFM/scaling. Không xuất CSV/JSON riêng; thông tin tái lập và tham số
-  được hiển thị trong notebook, PNG ở `figures/`.
-  Notebook này không đọc cache hoặc bảng do `eda_v1` xuất.
-- `preprocessing_v1.ipynb`: phần tiền xử lý hiện có của nhóm, được giữ nguyên.
-  Không cần chạy notebook đó để chạy hai notebook EDA, vì nó có cell ghi processed.
+- `eda_v1.ipynb`: giới thiệu/chất lượng, đơn biến, thời gian/quốc gia,
+  Num vs Num, Num vs Cat, Cat vs Cat, đa biến và tương quan. Tạo 24 PNG,
+  9 CSV mới, metadata/kiểm kê hình và cập nhật báo cáo Markdown từ bảng đã tính.
+- `eda_v2_outlier.ipynb`: chạy độc lập, tập trung phân phối/ngoại lệ/RFM/scaling.
+  Tính lại từ nguồn, tái tạo có chủ đích 5 PNG chuyên sâu cùng tên; không đọc cache,
+  không ghi CSV hoặc báo cáo của v1.
+- `eda_analysis.py`: đọc/kiểm kê, trace đối chiếu clean_data, bảng khách/RFM,
+  Spearman/Pearson/n theo cặp và các kiểm tra công thức.
+- `eda_presentation.py`: toàn bộ mã vẽ và nhận xét tiếng Việt từ số liệu thực thi.
+- `eda_report.py`: cấu trúc báo cáo 0–14, công thức/bảng và kiểm kê hình.
 
-Các phép tính EDA và code vẽ hình nằm trực tiếp trong notebook tương ứng.
-Hai notebook vẫn sử dụng API sẵn có trong `src/preprocessing.py` và `src/features.py`
-để thống nhất với pipeline của nhóm; không thay đổi các module đó.
+Mã notebook chỉ gọi các hàm dùng lại tại đây. Mọi công thức/biến đổi có thể kiểm tra;
+không chỉ giữ hình tĩnh. Bảng đầy đủ ở `analysis['tables']` sau Run All.
 
-Dùng Python có thư viện trong `project/requirements.txt`, cùng `nbformat`,
-`nbclient`, `nbconvert`, `ipykernel`, `Pillow`. Môi trường và checksum nguồn được
-hiển thị trong output từng notebook. Từ thư mục gốc repository, có thể chạy riêng:
+## Môi trường và lệnh chạy
+
+Dùng thư viện trong `project/requirements.txt`, cùng `nbformat`, `nbclient`,
+`nbconvert`, `ipykernel`, `Pillow`. Môi trường hiện có `project/.venv-eda/` đã đủ thư viện.
+Python mặc định có thể không có các thư viện này. Từ gốc repository:
 
 ```powershell
-& project/.venv-eda/Scripts/python.exe -X utf8 -m jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb
+& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v1.ipynb
+& project/.venv-eda/Scripts/python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v2_outlier.ipynb
 ```
 
-```powershell
-& project/.venv-eda/Scripts/python.exe -X utf8 -m jupyter nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 project/notebooks/01_eda/eda_v2_outlier.ipynb
-```
+Hoặc mở bằng Jupyter, chọn đúng kernel của môi trường và **Restart Kernel → Run All**.
+Mỗi notebook chạy riêng được; thứ tự trên dùng để tái tạo đầy đủ bộ bàn giao.
+Notebook tự tìm `project/` trong repository, không có đường dẫn máy tác giả.
+Đọc Excel có thể mất vài phút; không cần tải dữ liệu hoặc gọi mạng khi chạy lại.
 
-Nếu dùng môi trường khác, thay đường dẫn Python và chọn đúng kernel của môi trường đó.
-Notebook tự tìm `project/` từ working directory trong repository; không có đường dẫn
-riêng của tác giả. Việc đọc workbook có thể mất vài phút.
+## Đầu ra và kiểm tra
 
-`eda_v1` tính 35 bảng trong notebook, tạo lại 16 PNG và chỉ xuất 3 CSV:
-`customer_behavior.csv`, `rfm.csv`, `rfm_transformed.csv`. Tham số scaling hiển thị đầy đủ
-trong bảng `scaling_parameters` và output notebook; không cần JSON/CSV tham số riêng.
-Các bảng thiếu/trùng/thống kê/quốc gia/ngoại lệ vẫn được tính và hiển thị trong notebook;
-sau Run All, xem toàn bộ bằng biến `tables["tên_bảng"]`.
-[Báo cáo quá trình EDA](../../reports/bao_cao_qua_trinh_eda.md) đã hoàn thành được giữ
-riêng; Run All không ghi đè văn bản báo cáo. Khi thay dữ liệu hoặc chính sách, cập nhật
-cả phần nhận xét trong notebook và nội dung báo cáo theo kết quả mới.
-Notebook kiểm tra SHA256 của workbook và module nguồn trước/sau, đồng thời hiển thị
-phiên bản thư viện. Dữ liệu gốc, processed và CSV khảo sát Form 2 cũ được giữ nguyên.
-Thông tin nguồn Form 2 cũ đã chuyển sang phụ lục của báo cáo Form 2; các bảng cũ chỉ dùng
-đối chiếu lịch sử, không thay cho bảng khảo sát mới.
+- Hình: `notebooks/01_eda/figures/*.png`.
+- Bảng mới: `experiments/eda_current_policy/tables/`: customer_behavior, rfm,
+  rfm_transformed, correlation_spearman, correlation_pearson,
+  correlation_pairwise_counts, correlation_column_audit, preprocessing_trace,
+  scaling_parameters.
+- Dấu vết: `experiments/eda_current_policy/run_metadata.json` và `figure_inventory.csv`.
+- [Báo cáo EDA](../../reports/bao_cao_qua_trinh_eda.md) dùng đường dẫn hình tương đối.
 
-RFM và fit scaling là phần bổ sung sau EDA được form ban đầu cho phép, được đánh dấu riêng
-và vẫn là thử nghiệm; chưa chạy mô hình phân cụm. Các quy tắc mua/hủy/phí/trùng,
-danh mục sản phẩm và lựa chọn cửa sổ vẫn **Cần nhóm xác nhận**.
+Cửa sổ [2009-12-01, 2011-12-10); nguồn không ghi múi giờ. Invoice nhiều thời điểm dùng
+earliest trong các dòng còn lại. Khách nhiều quốc gia → Multi-country, không gán tùy ý.
+F = n_orders; M = total_purchase_value (Q×P chính xác), không đếm trùng biến cùng nghĩa.
+Không điền gap NaN của khách một đơn bằng 0, không giả định regex xác minh sản phẩm,
+không biến mã khách thành biến số liên tục. Ngưỡng IQR của EDA chỉ gắn cờ điều tra.
+
+Run All kiểm tra khóa, tổng hóa đơn/dòng/giá trị, AOV và gap độc lập, mọi hệ số bằng scipy,
+số hợp lệ từng cặp, scaling và SHA256 của raw/processed/src/bảng lịch sử trước/sau.
+Metadata ghi Python/thư viện, HEAD, mốc thời gian và checksum. Hai notebook giữ output đã chạy;
+hình phải được kiểm tra trực tiếp trước khi tuyên bố kiểm tra hiển thị.
+Không tự suy diễn vùng scatter thành cụm hoặc tạo kết quả mô hình chưa chạy.
+
+## Hình lịch sử
+
+Giữ 13 tên PNG cũ và tái tạo cho phạm vi mới, thêm 11 PNG. Ba hình dư được thay thế:
+`customer_orders_vs_value.png` bằng panel sáu cặp số;
+`signed_line_value_by_country.png` gộp trong panel quốc gia bốn chỉ tiêu;
+`raw_transaction_histograms_p01_p99.png` bằng histogram/boxplot toàn miền symlog.
+Danh sách/SHA256 nằm trong figure_inventory.csv. Sau khi bộ hình mới đã kiểm tra,
+ba hình dư được xóa trong phạm vi EDA; Run All không tự xóa tệp.
+
+Các quyết định về trùng, Guest, C/hoàn trả, danh mục mã, ngoại lệ, RFM và bộ biến/scaling
+cần Thuận/nhóm trưởng xác nhận trước dùng làm đầu vào mô hình chính thức.

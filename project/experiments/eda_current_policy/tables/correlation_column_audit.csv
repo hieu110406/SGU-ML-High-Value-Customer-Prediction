@@ -1,0 +1,15 @@
+﻿variable,status,valid,missing,unique
+Recency,included,5849,0,5699
+Frequency,included,5849,0,86
+Monetary,included,5849,0,5750
+avg_order_value,included,5849,0,5758
+avg_purchase_gap_days,included,4227,1622,4199
+observed_tenure_days,included,5849,0,5737
+n_stock_codes_candidate,included,5849,0,458
+total_quantity_candidate,included,5849,0,2348
+avg_quantity_per_order_candidate,included,5849,0,3040
+n_distinct_products,all_missing,0,5849,0
+avg_quantity_per_order,all_missing,0,5849,0
+total_quantity,all_missing,0,5849,0
+return_rate,all_missing,0,5849,0
+Customer ID,non_numeric,5849,0,5849

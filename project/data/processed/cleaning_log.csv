@@ -1,0 +1,9 @@
+﻿Bước,Số dòng còn lại,Số dòng bị loại,% còn lại so với gốc
+Dữ liệu gốc (Online Retail.xlsx),541909,0,100.0
+"Bước 1. Điền Description thiếu, chuẩn hóa văn bản, EIRE → Ireland",541909,0,100.0
+Bước 2. Bỏ dòng trùng lặp,536641,5268,99.03
+Bước 3a. Bỏ hóa đơn hủy (Invoice bắt đầu bằng C),527390,9251,97.32
+Bước 3b. Giữ Quantity > 0 và Price > 0,524878,2512,96.86
+"Bước 3c. Bỏ mã hàng đặc biệt (POST, M, BANK CHARGES...)",522571,2307,96.43
+Bước 4. Bỏ ngoại lai cực đoan (IQR x 3 trên log1p),522388,183,96.4
+Bước 5. Customer ID thiếu → 'Guest' (đổi kiểu sang chuỗi),522388,0,96.4

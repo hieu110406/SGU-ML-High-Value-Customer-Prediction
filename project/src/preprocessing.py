@@ -1,17 +1,19 @@
-"""Mã tiền xử lý đang chờ nhóm rà soát cho raw Online Retail của dự án.
-
-Các hàm clean hiện dùng tên cột nội bộ Invoice/Price/Customer ID, chưa tương thích
-trực tiếp với schema raw InvoiceNo/UnitPrice/CustomerID và chưa được phê duyệt.
+"""Tiền xử lý dữ liệu Online Retail cho bài toán phân cụm RFM.
 """
 from __future__ import annotations
 
+import hashlib
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 RAW_PATH = Path(__file__).resolve().parents[1] / "data/raw/Online Retail.xlsx"
-PROCESSED_DIR = Path("data/processed")
+PROCESSED_DIR = Path(__file__).resolve().parents[1] / "data/processed"
+RAW_SHA256 = "43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d"
+
+
+RENAME = {"InvoiceNo": "Invoice", "UnitPrice": "Price", "CustomerID": "Customer ID"}
 
 
 SPECIAL_CODES = {
@@ -23,9 +25,18 @@ OUTLIER_K = 3.0
 
 
 def load_raw(path: Path | str = RAW_PATH) -> pd.DataFrame:
-    """Đọc workbook vào bộ nhớ; raw hiện tại có một sheet và chưa được làm sạch."""
+    """Đọc workbook vào bộ nhớ, không đổi tên cột và không làm sạch."""
     sheets = pd.read_excel(path, sheet_name=None, engine="openpyxl")
     return pd.concat(sheets.values(), ignore_index=True)
+
+
+def sha256_of(path: Path | str = RAW_PATH) -> str:
+    """SHA-256 của file raw, để đối chiếu với `RAW_SHA256`."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
 
 
 def outlier_mask(df: pd.DataFrame, cols=OUTLIER_COLS, k: float = OUTLIER_K) -> pd.Series:
@@ -40,14 +51,16 @@ def outlier_mask(df: pd.DataFrame, cols=OUTLIER_COLS, k: float = OUTLIER_K) -> p
 
 
 def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Chính sách thử nghiệm cũ, chưa phê duyệt cho raw của dự án."""
-    if {"InvoiceNo", "UnitPrice", "CustomerID"}.issubset(raw.columns):
-        raise ValueError("clean_data chưa tương thích schema raw InvoiceNo/UnitPrice/CustomerID; "
-                         "nhóm cần thống nhất chính sách và cập nhật pipeline trước khi chạy.")
-    log: list[tuple[str, int]] = [("Dữ liệu nguồn đầu vào", len(raw))]
-    df = raw.copy()
+    """Làm sạch toàn bộ dữ liệu. Trả về `(clean, log_df)`."""
+    needed = set(RENAME) | {"StockCode", "Description", "Quantity", "InvoiceDate", "Country"}
+    missing = sorted(needed - set(raw.columns))
+    if missing:
+        raise ValueError(f"Thiếu cột của raw Online Retail: {missing}")
 
-   
+    log: list[tuple[str, int]] = [("Dữ liệu gốc (Online Retail.xlsx)", len(raw))]
+    df = raw.rename(columns=RENAME).copy()
+
+    
     df["Description"] = df["Description"].fillna("Unknown Product")
     df["Description"] = df["Description"].astype(str).str.strip().str.upper()
     df["Invoice"] = df["Invoice"].astype(str).str.strip().str.upper()
@@ -67,7 +80,7 @@ def clean_data(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     df = df[~df["StockCode"].isin(SPECIAL_CODES)]
     log.append(("Bước 3c. Bỏ mã hàng đặc biệt (POST, M, BANK CHARGES...)", len(df)))
 
-    
+  
     df = df[~outlier_mask(df)]
     log.append((f"Bước 4. Bỏ ngoại lai cực đoan (IQR x {OUTLIER_K:g} trên log1p)", len(df)))
 

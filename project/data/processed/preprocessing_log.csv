@@ -1,8 +1,0 @@
-﻿Bước,Số dòng còn lại,Số dòng bị loại
-Dữ liệu gốc sau khi gộp sheet,1067371,0
-Bỏ dòng trùng hoàn toàn,1033036,34335
-Bỏ dòng thiếu CustomerID,797885,235151
-Bỏ mã hàng dịch vụ/phí/thử nghiệm,794244,3641
-Tách hóa đơn hủy (tiền tố C) sang bảng riêng,776657,17587
-Bỏ dòng bán có Quantity <= 0 hoặc Price <= 0,776596,61
-Bỏ dòng bán đã bị hủy nguyên vẹn (đơn lỗi/ngoại lai),770606,5990

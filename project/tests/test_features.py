@@ -8,7 +8,7 @@ from pandas.testing import assert_frame_equal
 
 from project.src.features import (
     aggregate_purchase_orders, audit_c_documents, audit_stock_codes,
-    build_customer_behavior_features,
+    build_customer_behavior_features, build_rfm,
 )
 
 
@@ -209,6 +209,69 @@ class AuditTests(unittest.TestCase):
         aware = pd.DataFrame([line(date=pd.Timestamp("2020-01-01", tz="UTC"))])
         with self.assertRaisesRegex(ValueError, "múi giờ"):
             build_customer_behavior_features(aware, **WINDOW)
+
+
+class RFMTests(unittest.TestCase):
+    def test_three_customers_match_hand_calculations_and_preserve_input(self):
+        source = fixture()
+        before = source.copy(deep=True)
+        rfm = build_rfm(source, **WINDOW).set_index("Customer ID")
+        # Khách 10001: 3 hóa đơn giá trị 28, 24, 4; phí POST=3 vẫn thuộc M.
+        expected = {
+            "10001": (8, 3, 56.0),
+            "10002": (17, 1, 10.0),
+            "10003": (15, 2, 20.0),
+        }
+        for customer, (recency, frequency, monetary) in expected.items():
+            with self.subTest(customer=customer):
+                self.assertEqual(rfm.loc[customer, "Recency"], recency)
+                self.assertEqual(rfm.loc[customer, "Frequency"], frequency)
+                self.assertAlmostEqual(rfm.loc[customer, "Monetary"], monetary)
+        self.assertTrue(rfm.index.is_unique)
+        self.assertEqual(rfm.columns.to_list(), ["Recency", "Frequency", "Monetary"])
+        assert_frame_equal(source, before)
+
+    def test_recency_is_calendar_days_from_latest_line_not_earliest_invoice(self):
+        rows = pd.DataFrame([
+            line(date="2020-01-18 23:59"), line(date="2020-01-19 23:59"),
+        ])
+        rfm = build_rfm(rows, **WINDOW)
+        self.assertEqual(rfm.iloc[0]["Recency"], 1)
+        self.assertEqual(rfm.iloc[0]["Frequency"], 1)
+        self.assertEqual(rfm.iloc[0]["Monetary"], 40)
+        with self.assertRaisesRegex(ValueError, "nhiều thời điểm"):
+            build_rfm(rows, **WINDOW, invoice_time_policy="require_unique")
+
+    def test_window_excludes_reference_and_future_without_leakage(self):
+        base = pd.DataFrame([line(date="2020-01-01 00:00")])
+        augmented = pd.concat([base, pd.DataFrame([
+            line(invoice="500002", date="2020-01-20 00:00", price=-999),
+            line(invoice="500003", date="2021-01-01", quantity=-999),
+            line(invoice="500004", date="2019-12-31 23:59", price=-999),
+        ])], ignore_index=True)
+        assert_frame_equal(build_rfm(base, **WINDOW), build_rfm(augmented, **WINDOW))
+        self.assertEqual(build_rfm(base, **WINDOW).iloc[0]["Recency"], 19)
+
+    def test_monetary_does_not_round_each_line_or_implicitly_drop_duplicates(self):
+        one = line(quantity=3, price=0.3333)
+        rfm = build_rfm(pd.DataFrame([one, dict(one)]), **WINDOW)
+        self.assertAlmostEqual(rfm.iloc[0]["Monetary"], 1.9998)
+        self.assertEqual(rfm.iloc[0]["Frequency"], 1)
+
+    def test_invalid_purchase_keys_values_and_invoice_conflict_are_rejected(self):
+        for row in [line(customer=None), line(invoice="C500001"), line(price=0),
+                    line(quantity=-1), line(price=np.inf), line(date=None)]:
+            with self.subTest(row=row), self.assertRaises(ValueError):
+                build_rfm(pd.DataFrame([row]), **WINDOW)
+        with self.assertRaisesRegex(ValueError, "nhiều Customer ID"):
+            build_rfm(pd.DataFrame([line(), line(customer="10002")]), **WINDOW)
+
+    def test_empty_window_keeps_schema_and_metadata(self):
+        rfm = build_rfm(pd.DataFrame([line(date="2021-01-01")]), **WINDOW)
+        self.assertTrue(rfm.empty)
+        self.assertEqual(rfm.columns.to_list(), ["Customer ID", "Recency", "Frequency", "Monetary"])
+        self.assertEqual(rfm.attrs["window_closed"], "left")
+        self.assertFalse(rfm.attrs["identifier_is_feature"])
 
 
 if __name__ == "__main__":

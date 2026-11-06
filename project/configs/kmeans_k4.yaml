@@ -1,1 +1,19 @@
-# TODO: Define the KMeans k=4 experiment after the configuration schema is set.
+# Historical filename retained to avoid breaking existing references. k is scanned.
+run_id: rfm_kmeans_experimental_v1
+status: experimental
+authorization: "User selected the isolated experimental configuration on 2026-11-06; not official team approval."
+raw_path: data/raw/Online Retail.xlsx
+raw_sha256: 43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d
+sheet: Online Retail
+cleaning_policy: positive_purchases_v1
+window_start: '2010-12-01'
+reference_date: '2011-12-10'
+features: [Recency, Frequency, Monetary]
+transform: log1p
+scaler: StandardScaler
+k_values: [2, 3, 4, 5, 6, 7, 8, 9, 10]
+selection: highest_full_population_silhouette
+random_state: 42
+n_init: 20
+max_iter: 300
+output_dir: experiments/baseline

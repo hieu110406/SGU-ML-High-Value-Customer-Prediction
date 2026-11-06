@@ -47,7 +47,7 @@ Nguồn mô tả: [UCI Online Retail](https://archive.ics.uci.edu/dataset/352/on
 | known_customer_ids | 4372 |
 | stock_codes | 4070 |
 | countries | 38 |
-| schema_note | Một sheet; schema raw InvoiceNo/UnitPrice/CustomerID chưa tương thích trực tiếp với API tiền xử lý hiện có |
+| schema_note | Một sheet; giữ schema raw InvoiceNo/UnitPrice/CustomerID; bí danh cột cũ chỉ dùng để đối chiếu lịch sử |
 
 
 ### Từng sheet
@@ -72,16 +72,16 @@ Nguồn mô tả: [UCI Online Retail](https://archive.ics.uci.edu/dataset/352/on
 | CustomerID | float64 | string | Mã khách; không phải biến số liên tục | identifier | mã |
 | Country | str | string | Quốc gia của khách theo UCI | category | nhãn |
 
-| ten_trong_api_chua_tuong_thich | current_raw_column | eda_column | action |
+| legacy_column_alias | current_raw_column | eda_column | action |
 | --- | --- | --- | --- |
-| Invoice | InvoiceNo | InvoiceNo | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| StockCode | StockCode | StockCode | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| Description | Description | Description | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| Quantity | Quantity | Quantity | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| InvoiceDate | InvoiceDate | InvoiceDate | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| Price | UnitPrice | UnitPrice | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| Customer ID | CustomerID | CustomerID | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
-| Country | Country | Country | Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc |
+| Invoice | InvoiceNo | InvoiceNo | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| StockCode | StockCode | StockCode | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| Description | Description | Description | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| Quantity | Quantity | Quantity | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| InvoiceDate | InvoiceDate | InvoiceDate | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| Price | UnitPrice | UnitPrice | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| Customer ID | CustomerID | CustomerID | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
+| Country | Country | Country | Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc |
 
 
 ### Đầu/cuối workbook
@@ -731,7 +731,7 @@ Cần thống nhất: xử lý khách thiếu mã; định nghĩa trùng; nhận
 ## 9. Tái lập và kiểm tra
 
 
-Mở [notebook](../notebooks/01_eda/eda_raw_moi.ipynb), Restart Kernel → Run All. [README EDA](../notebooks/01_eda/README.md) có lệnh chạy. [Kiểm kê nguồn](kiem_ke_eda_raw_moi.md) mô tả raw duy nhất và các hạn chế cần lưu ý.
+Mở [notebook](../notebooks/01_eda/eda.ipynb), Restart Kernel → Run All. [README EDA](../notebooks/01_eda/README.md) có lệnh chạy. [Kiểm kê nguồn](kiem_ke_eda.md) mô tả raw duy nhất và các hạn chế cần lưu ý.
 
 
 SHA-256 raw: `43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d`. [Workbook kết quả](../experiments/eda_raw_moi/ket_qua_eda.xlsx) chứa metadata, danh mục hình và bảng thống kê. Notebook và báo cáo dùng cùng bảng/nhận xét tạo trong một lần chạy.

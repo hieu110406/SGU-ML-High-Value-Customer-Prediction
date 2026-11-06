@@ -1,4 +1,6 @@
-# Kiểm kê nguồn raw và phạm vi EDA
+# Kiểm kê nguồn raw và phạm vi EDA — bản ghi lịch sử
+
+> **Phạm vi thời điểm:** trạng thái Git, API và hành động dưới đây ghi nhận lần dựng EDA trước, không mô tả HEAD hiện tại. Kiểm tra và pipeline thử nghiệm ngày 06/11/2026 ở [báo cáo tiến độ](bao_cao_tien_do.md).
 
 Dự án chỉ sử dụng **một file raw**: `data/raw/Online Retail.xlsx`, sheet `Online Retail`. Dữ liệu từng được chọn nhầm không phải nguồn của dự án; mọi số liệu, hình, bảng đã xử lý và kết quả tính từ dữ liệu đó đều không hợp lệ. Những sản phẩm của thành viên còn lưu chỉ được giữ để đối chiếu công việc, không dùng làm bằng chứng hay đầu vào.
 
@@ -73,11 +75,11 @@ Trang nguồn ghi không có giá trị thiếu, nhưng kiểm tra workbook cụ
 | Notebook / mã EDA | `notebooks/01_eda/` | EDA từ raw duy nhất; không gọi pipeline cleaning |
 | Hình | `notebooks/01_eda/figures/raw/` | 21 hình, nêu phạm vi và nguồn |
 | Workbook kết quả | `experiments/eda_raw_moi/ket_qua_eda.xlsx` | Bảng thống kê, metadata, danh mục hình, kết quả kiểm tra |
-| Báo cáo | `reports/bao_cao_eda_raw_moi.md` | Nhận xét từ cùng một lần chạy EDA |
+| Báo cáo | `reports/bao_cao_eda.md` | Nhận xét từ cùng một lần chạy EDA |
 | Đề xuất | `reports/de_xuat_sau_eda.md` | Phương án cleaning, encoding, scaling, feature chưa chốt |
 | Phần việc tiền xử lý / Form 2 | `src/preprocessing.py`, `notebooks/05_data_processing/`, `data/processed/`, `experiments/form2_manual_behavior_raw_survey/` | API và kết quả từng có chưa được xác minh cho raw duy nhất; không dùng output từ dữ liệu chọn nhầm |
 
-API tiền xử lý hiện dùng tên nội bộ `Invoice`, `Price`, `Customer ID`, chưa tương thích trực tiếp cột raw `InvoiceNo`, `UnitPrice`, `CustomerID`. Quy tắc cleaning cần nhóm thống nhất trước khi cập nhật pipeline. Chưa có bộ dữ liệu sạch hoặc bộ đặc trưng chính thức được tạo trong EDA.
+Tại thời điểm kiểm kê EDA, API dùng `Invoice`, `Price`, `Customer ID` và chưa nhận trực tiếp schema raw `InvoiceNo`, `UnitPrice`, `CustomerID`. Lần cập nhật 06/11/2026 bổ sung đường đọc raw và adapter tường minh cho cấu hình thử nghiệm; xem `src/preprocessing.py` và [báo cáo tiến độ](bao_cao_tien_do.md). EDA không tạo dữ liệu sạch/đặc trưng chính thức.
 
 ## 5. Chạy lại và quyết định còn chờ
 

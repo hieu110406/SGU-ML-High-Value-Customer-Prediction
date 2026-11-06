@@ -92,7 +92,7 @@ def load_analysis(project):
                                   repeated_header_rows=int(frame.astype("string").eq(
                                       pd.Series(frame.columns, index=frame.columns)).all(axis=1).sum())))
     # No silent concatenation of unknown sheets or schema conversion.
-    if len(sheets) != 1 or list(next(iter(sheets.values())).columns) != COLUMNS:
+    if list(sheets) != ["Online Retail"] or list(next(iter(sheets.values())).columns) != COLUMNS:
         raise ValueError("Workbook schema/sheets changed; inspect before extending EDA.")
     sheet_name, raw = next(iter(sheets.items()))
     df = raw.copy(deep=True)
@@ -152,7 +152,7 @@ def build_tables(a):
         ("source_timezone", "Không được cung cấp; không chuyển múi giờ"),
         ("invoices_including_C", d.InvoiceNo.nunique()), ("known_customer_ids", d.CustomerID.nunique()),
         ("stock_codes", d.StockCode.nunique()), ("countries", d.Country.nunique()),
-        ("schema_note", "Một sheet; schema raw InvoiceNo/UnitPrice/CustomerID chưa tương thích trực tiếp với API tiền xử lý hiện có")
+        ("schema_note", "Một sheet; giữ schema raw InvoiceNo/UnitPrice/CustomerID; bí danh cột cũ chỉ dùng để đối chiếu lịch sử")
     ], columns=["item", "value"])
     meanings = [("Mã chứng từ; C là dấu hiệu hủy theo UCI", "identifier", "mã"),
                 ("Mã hàng; có thể gồm mã dịch vụ/điều chỉnh", "identifier/category", "mã"),
@@ -164,9 +164,9 @@ def build_tables(a):
     t["data_dictionary"] = pd.DataFrame([dict(column=col, raw_dtype=str(raw[col].dtype),
         eda_dtype=str(d[col].dtype), meaning=meaning, role=role, unit=unit)
         for col, (meaning, role, unit) in zip(COLUMNS, meanings)])
-    t["column_mapping"] = pd.DataFrame({"ten_trong_api_chua_tuong_thich": ["Invoice", "StockCode", "Description", "Quantity",
+    t["column_mapping"] = pd.DataFrame({"legacy_column_alias": ["Invoice", "StockCode", "Description", "Quantity",
         "InvoiceDate", "Price", "Customer ID", "Country"], "current_raw_column": COLUMNS,
-        "eda_column": COLUMNS, "action": ["Đối chiếu API hiện có; chỉ có một raw, không đổi Excel gốc"]*8})
+        "eda_column": COLUMNS, "action": ["Bí danh cũ để đối chiếu; phân tích nhận schema raw, không đổi Excel gốc"]*8})
     samples = pd.concat([raw.head(5).assign(sample="head"), raw.tail(5).assign(sample="tail")])
     t["raw_samples"] = samples.rename_axis("zero_based_row").reset_index()
     t["missing_values"] = pd.DataFrame({"column": COLUMNS, "raw_null_count": raw.isna().sum().values,
@@ -673,11 +673,11 @@ def write_report(a):
         "Xem [đề xuất sau EDA](de_xuat_sau_eda.md): so sánh nhiều lựa chọn về clean, encoding, scaling và feature. Đặc trưng thủ công, RFM và kết hợp đều là đề xuất chưa chốt.\n",
         "Cần thống nhất: xử lý khách thiếu mã; định nghĩa trùng; nhận diện/ghép hủy-trả; giá 0/âm; mã dịch vụ; ngoại lệ và khách mua sỉ; cửa sổ lịch sử; công thức giá trị/gap; dùng danh mục hay chỉ hành vi; cách scaling và tập biến.\n",
         "## 9. Tái lập và kiểm tra\n",
-        "Mở [notebook](../notebooks/01_eda/eda_raw_moi.ipynb), Restart Kernel → Run All. [README EDA](../notebooks/01_eda/README.md) có lệnh chạy. [Kiểm kê nguồn](kiem_ke_eda_raw_moi.md) mô tả raw duy nhất và các hạn chế cần lưu ý.\n",
+        "Mở [notebook](../notebooks/01_eda/eda.ipynb), Restart Kernel → Run All. [README EDA](../notebooks/01_eda/README.md) có lệnh chạy. [Kiểm kê nguồn](kiem_ke_eda.md) mô tả raw duy nhất và các hạn chế cần lưu ý.\n",
         f"SHA-256 raw: `{a['raw_hash']}`. [Workbook kết quả](../experiments/eda_raw_moi/ket_qua_eda.xlsx) chứa metadata, danh mục hình và bảng thống kê. Notebook và báo cáo dùng cùng bảng/nhận xét tạo trong một lần chạy.\n",
         "Các kiểm tra tự động đối chiếu tổng dòng theo tháng/quốc gia, tổng giá trị theo khách, AOV, gap một đơn, cặp tương quan với scipy và checksum vùng bảo vệ; kết quả nằm trong sheet Metadata của workbook.\n",
         "Giới hạn: một nhà bán lẻ và cửa sổ lịch sử hữu hạn; không đại diện toàn thị trường, không biết lịch sử ngoài cửa sổ, chưa ghép chứng từ trả với mua, chưa có nhãn mục tiêu. Không suy ra quan hệ nhân quả hay dự báo từ EDA này.\n"]
-    path=a["project"]/"reports/bao_cao_eda_raw_moi.md"
+    path=a["project"]/"reports/bao_cao_eda.md"
     path.write_text("\n\n".join(parts),encoding="utf-8")
     return path
 
@@ -699,7 +699,7 @@ def export_results(a):
     report=write_report(a)
     module_dir=Path(__file__).parent
     code_paths=[module_dir/"eda_raw_analysis.py",module_dir/"build_eda_raw_notebook.py"]
-    notebook=json.loads((module_dir/"eda_raw_moi.ipynb").read_text(encoding="utf-8"))
+    notebook=json.loads((module_dir/"eda.ipynb").read_text(encoding="utf-8"))
     cell_sources=[{"cell_type":cell["cell_type"],"source":cell["source"]} for cell in notebook["cells"]]
     metadata=dict(run_started=a["run_started"],run_completed=datetime.now(timezone(timedelta(hours=7))).isoformat(),
         client_timezone="Asia/Bangkok",source_timestamp_timezone="unspecified; no conversion",

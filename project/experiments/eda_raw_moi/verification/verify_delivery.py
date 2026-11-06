@@ -19,7 +19,7 @@ ROOT = next(p for p in Path(__file__).resolve().parents
             if (p / "project/data/raw/Online Retail.xlsx").is_file())
 PROJECT = ROOT / "project"
 OUT = PROJECT / "experiments/eda_raw_moi"
-NOTEBOOK = PROJECT / "notebooks/01_eda/eda_raw_moi.ipynb"
+NOTEBOOK = PROJECT / "notebooks/01_eda/eda.ipynb"
 
 
 def sha(path):
@@ -55,21 +55,27 @@ def verify():
     for row in tables.itertuples():
         frame = pd.read_excel(excel, sheet_name=row.sheet)
         assert len(frame) == row.rows
-    for path, digest in metadata["protected_before"].items():
-        assert sha(PROJECT / path) == digest == metadata["protected_after"][path]
+    # The snapshots establish that the EDA run itself was read-only. Production
+    # code and processed artifacts may legitimately change after that run.
+    assert metadata["protected_before"] == metadata["protected_after"]
+    assert sha(PROJECT / metadata["raw_file"]) == metadata["raw_sha256"]
+    protected_changes_since_run = [
+        path for path, digest in metadata["protected_after"].items()
+        if not (PROJECT / path).is_file() or sha(PROJECT / path) != digest
+    ]
     for name, digest in metadata["code_sha256"].items():
         assert sha(NOTEBOOK.parent / name) == digest
     cell_sources = [{"cell_type": c["cell_type"], "source": c["source"]}
                     for c in json.loads(NOTEBOOK.read_text(encoding="utf-8"))["cells"]]
     assert hashlib.sha256(json.dumps(cell_sources, ensure_ascii=False, sort_keys=True).encode()).hexdigest() == metadata["notebook_source_sha256"]
-    report = PROJECT / "reports/bao_cao_eda_raw_moi.md"
+    report = PROJECT / "reports/bao_cao_eda.md"
     assert sha(report) == metadata["report_sha256"]
     text = report.read_text(encoding="utf-8")
     headings = re.findall(r"^## ([0-9]+)\.", text, flags=re.M)
     assert headings == [str(i) for i in range(10)], headings
     checked_links = []
     for document in [report, PROJECT / "reports/de_xuat_sau_eda.md",
-                     PROJECT / "reports/kiem_ke_eda_raw_moi.md", NOTEBOOK.parent / "README.md"]:
+                     PROJECT / "reports/kiem_ke_eda.md", NOTEBOOK.parent / "README.md"]:
         for target in re.findall(r"\]\(([^)]+)\)", document.read_text(encoding="utf-8-sig")):
             if re.match(r"https?://|mailto:|#", target):
                 continue
@@ -86,21 +92,19 @@ def verify():
             "execution_order": "1 through final cell, fresh kernel", "error_outputs": 0,
             "warning_or_stream_outputs": 0, "embedded_pngs": pngs,
             "nbformat_valid": True, "source_hash_matches_metadata": True,
-            "all_embedded_pngs_byte_identical_to_reviewed_files": True},
+            "all_embedded_pngs_byte_identical_to_saved_files": True},
         "links_checked": len(checked_links), "all_local_links_resolve": True,
         "statistical_tables": len(tables), "figures": len(figures),
         "all_table_row_counts_and_figure_report_code_hashes_match": True,
         "raw_and_other_protected_files_unchanged_during_run": True,
+        "protected_changes_since_run": protected_changes_since_run,
+        "protected_snapshot_scope": "before/after the recorded EDA execution; later production changes are informational",
         "independent_validation": f"{len(independent)} checks in Kiem_chung_doc_lap",
         "report_numbered_sections_in_order": headings,
         "visual_review": {
-            "method": "Visual review of PNGs from the previous equivalent execution; this script verifies files and notebook images by hash, but does not perform visual inspection",
-            "figure_ids_inspected": figures.figure_id.tolist(),
-            "checks": ["readable Vietnamese labels and units", "source and observation footer",
-                       "no clipped labels", "separate raw and customer matrices",
-                       "pair counts and gap missingness visible"],
-            "final_two_legend_fixes": "Reviewed in the previous equivalent execution",
-            "notebook_html_preview": "HTML export succeeded. Browser screenshot unavailable: local Edge failed GPU startup; second attempt did not produce a screenshot and was stopped. Notebook layout in browser remains unverified. All 21 saved notebook PNGs were verified byte-identical to the visually inspected files; section order and links were checked.",
+            "method": "Automated hashes and notebook structure only; this script performs no visual inspection",
+            "figure_ids_inspected": [],
+            "notebook_html_preview": "Not performed by this validator",
             "grayscale_or_color_vision_simulation": "not performed"},
         "official_preprocessing_or_models_applied": False,
     }

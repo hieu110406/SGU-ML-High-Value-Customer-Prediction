@@ -4,7 +4,9 @@ Tài liệu này phục vụ thảo luận bước tiếp theo của bài toán 
 
 Các liên kết bằng chứng mở cùng một workbook; tra tên bảng trong sheet `Danh_muc_bang` để tìm đúng sheet dữ liệu.
 
-Nguồn raw duy nhất là [`data/raw/Online Retail.xlsx`](../data/raw/Online%20Retail.xlsx). Đối chiếu phiên bản, SHA-256, sheet và thời gian chạy tại [sheet Metadata của workbook](../experiments/eda_raw_moi/ket_qua_eda.xlsx); xem kết quả đầy đủ trong [báo cáo EDA](bao_cao_eda_raw_moi.md) và [notebook](../notebooks/01_eda/eda_raw_moi.ipynb). Khảo sát Form 2 từ dữ liệu chọn nhầm không hợp lệ cho dự án và cần được tính lại trước khi dùng.
+Nguồn raw duy nhất là [`data/raw/Online Retail.xlsx`](../data/raw/Online%20Retail.xlsx). Đối chiếu phiên bản, SHA-256, sheet và thời gian chạy tại [sheet Metadata của workbook](../experiments/eda_raw_moi/ket_qua_eda.xlsx); xem kết quả đầy đủ trong [báo cáo EDA](bao_cao_eda.md) và [notebook](../notebooks/01_eda/eda.ipynb). Khảo sát Form 2 từ dữ liệu chọn nhầm không hợp lệ cho dự án và cần được tính lại trước khi dùng.
+
+> **Cập nhật 06/11/2026:** đây là tài liệu lựa chọn chính sách chính thức. Cấu hình thử nghiệm riêng được người dùng cho phép không đồng nghĩa nhóm đã duyệt các lựa chọn này; xem [báo cáo tiến độ](bao_cao_tien_do.md).
 
 ## 1. Bằng chứng và phạm vi cần mang sang bước tiếp theo
 
@@ -137,4 +139,4 @@ EDA chưa xác định hướng nào tốt hơn. Việc so sánh bộ biến, ph
 9. Chọn hành vi thủ công, RFM hoặc kết hợp; công bố công thức, đơn vị, cửa sổ, biến trùng và trạng thái từng biến.
 10. Trước khi triển khai chính thức, thống nhất thiết kế đánh giá, nơi fit tham số và quy tắc dữ liệu theo thời điểm để hạn chế leakage.
 
-Tất cả quyết định trên đang **chờ nhóm thống nhất**. Báo cáo này chỉ đề xuất; raw, dữ liệu processed, mã `src/` và khảo sát Form 2 được giữ nguyên.
+Các quyết định chính thức trên vẫn **chờ nhóm thống nhất**. Văn bản này lưu phương án EDA ngày 05/11/2026. Ngày 06/11/2026, người dùng cho phép cấu hình baseline thử nghiệm riêng; cấu hình, tác động và kết quả ở [báo cáo tiến độ](bao_cao_tien_do.md). Mã `src/` đã được cập nhật cho luồng thử nghiệm; raw, processed cũ và khảo sát Form 2 được giữ nguyên.

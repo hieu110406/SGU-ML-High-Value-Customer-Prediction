@@ -1,9 +1,10 @@
-"""Đặc trưng hành vi thủ công; chưa tạo RFM hoặc chuẩn hóa cho mô hình.
+"""Đặc trưng hành vi thủ công và RFM với cửa sổ/ngày tham chiếu rõ ràng.
 
 Các hàm không đọc/ghi tệp và không triển khai chính sách làm sạch. Bên gọi
 phải cung cấp góc nhìn các dòng mua phù hợp; dữ liệu C/âm được kiểm kê riêng.
 Mọi phép tính chỉ dùng cửa sổ [window_start, reference_date).
 Xem reports/form2_manual_behavior_features.md để biết công thức và giới hạn.
+``build_rfm`` phục vụ baseline thử nghiệm, không biến đổi hoặc scale dữ liệu.
 """
 
 from __future__ import annotations
@@ -116,6 +117,50 @@ def aggregate_purchase_orders(
     orders = _orders(work, invoice_time_policy)
     orders.attrs = {**work.attrs, "invoice_time_policy": invoice_time_policy}
     return orders
+
+
+def build_rfm(
+    transactions: pd.DataFrame, *, window_start: str | pd.Timestamp,
+    reference_date: str | pd.Timestamp, invoice_time_policy: str = "earliest",
+) -> pd.DataFrame:
+    """Một dòng/Customer ID với Recency, Frequency, Monetary chưa scale.
+
+    Đầu vào là các dòng mua dương được bên gọi chọn theo chính sách minh bạch.
+    Chỉ dùng cửa sổ ``[window_start, reference_date)``; không tự xóa dòng trùng,
+    C/âm hoặc điền mã khách. Recency là chênh lệch ngày lịch giữa ngày tham
+    chiếu và ngày có dòng mua mới nhất, không làm tròn khoảng thời gian 24h.
+    Frequency = số Invoice khác nhau; Monetary = tổng Quantity × Price (GBP),
+    không làm tròn từng dòng, không trừ hoàn trả và gồm dịch vụ nếu có ở đầu vào.
+
+    invoice_time_policy điều khiển việc kiểm tra một hóa đơn có nhiều thời
+    điểm, dùng cùng quy tắc với API hành vi. Recency luôn lấy dòng mua cuối,
+    không thay bằng thời điểm sớm nhất của hóa đơn. Không đưa Customer ID vào
+    ma trận số hoặc gán 0 cho gap chưa xác định của khách một hóa đơn.
+    """
+    work = _purchases(transactions, window_start=window_start, reference_date=reference_date)
+    _orders(work, invoice_time_policy)  # Kiểm khóa và chính sách thời điểm hóa đơn.
+    grouped = work.groupby("Customer ID", sort=True)
+    result = grouped.agg(
+        last_purchase=("InvoiceDate", "max"),
+        Frequency=("Invoice", "nunique"), Monetary=("_line_value", "sum"),
+    )
+    reference = pd.Timestamp(reference_date).normalize()
+    result["Recency"] = (reference - result["last_purchase"].dt.normalize()).dt.days
+    result = result.reset_index().loc[:, ["Customer ID", "Recency", "Frequency", "Monetary"]]
+    if not result["Customer ID"].is_unique or result["Customer ID"].isna().any():
+        raise ValueError("Bảng RFM phải có đúng một khóa Customer ID không thiếu mỗi khách.")
+    if not np.isfinite(result[["Recency", "Frequency", "Monetary"]].to_numpy(dtype=float)).all():
+        raise ValueError("RFM chứa giá trị không hữu hạn.")
+    if (result["Recency"].lt(0) | result["Frequency"].le(0) | result["Monetary"].le(0)).any():
+        raise ValueError("RFM yêu cầu Recency >= 0, Frequency > 0 và Monetary > 0.")
+    result.attrs = {
+        **work.attrs, "invoice_time_policy": invoice_time_policy,
+        "recency_definition": "calendar_days_between_reference_date_and_latest_purchase_date",
+        "frequency_definition": "distinct_purchase_invoices_per_customer",
+        "monetary_definition": "sum_of_unrounded_quantity_times_price_on_supplied_purchase_lines_GBP",
+        "scaling": "none", "identifier_is_feature": False,
+    }
+    return result
 
 
 def _stock_roles(roles: Mapping[str, str] | None) -> dict[str, str]:

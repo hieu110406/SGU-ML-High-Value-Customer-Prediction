@@ -1,6 +1,6 @@
 """Build the raw-only EDA notebook with short, ordered presentation cells.
 
-Rebuilding clears saved outputs: execute eda_raw_moi.ipynb afterward.
+Rebuilding clears saved outputs: execute eda.ipynb afterward.
 """
 from pathlib import Path
 import nbformat as nbf
@@ -88,7 +88,7 @@ display(Markdown(
 
 Nguồn mô tả: [UCI Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail), đã đọc ngày 05/11/2026.
 GBP dựa trên mô tả UCI, chưa có khai báo tiền tệ trong workbook. Các con số đo trực tiếp từ file local;
-khớp cấu trúc không đủ chứng minh chuỗi tải file. [Kiểm kê nguồn](../../reports/kiem_ke_eda_raw_moi.md)
+khớp cấu trúc không đủ chứng minh chuỗi tải file. [Kiểm kê nguồn](../../reports/kiem_ke_eda.md)
 ghi file raw duy nhất, phạm vi và giới hạn tái lập.
 """)
     for name, limit in [("raw_inventory",30),("workbook_sheets",12),("data_dictionary",12),
@@ -174,7 +174,7 @@ processed và khảo sát Form 2; kiểm tra tổng, gap/AOV và cặp tương q
     code('''metadata = export_results(analysis)
 display(Markdown(f"**Đã xuất {metadata['figure_count']} hình và {metadata['table_count']} bảng trong một workbook.**"))
 display(metadata["checks"])
-display(Markdown("[Báo cáo EDA](../../reports/bao_cao_eda_raw_moi.md) · "
+display(Markdown("[Báo cáo EDA](../../reports/bao_cao_eda.md) · "
                  "[Workbook bảng, metadata và danh mục hình](../../experiments/eda_raw_moi/ket_qua_eda.xlsx)"))''')
     md("""### Giới hạn khi diễn giải
 
@@ -186,7 +186,7 @@ Số liệu có dấu chưa là doanh thu thuần; tương quan không chứng m
     notebook.metadata={"kernelspec":{"display_name":"Python 3 (EDA)","language":"python","name":"python3"},
                        "language_info":{"name":"python"}}
     nbf.validate(notebook)
-    path=Path(__file__).with_name("eda_raw_moi.ipynb")
+    path=Path(__file__).with_name("eda.ipynb")
     nbf.write(notebook,path)
     print(f"Built {path.name}: {len(cells)} cells")
 

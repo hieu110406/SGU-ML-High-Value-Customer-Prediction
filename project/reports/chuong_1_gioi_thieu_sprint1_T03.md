@@ -9,6 +9,8 @@
 > không hợp lệ. Chưa có kết quả RFM/phân cụm được xác minh từ raw này; các bước liên quan
 > trong chương là kế hoạch, không phải kết quả thực nghiệm.
 
+> **Ghi chú phiên bản 06/11/2026:** giữ chức năng bản thảo Sprint 1 của tác giả. Các trạng thái “chưa có kết quả” bên dưới phản ánh thời điểm viết; tiến độ và kết quả baseline thử nghiệm mới ở [báo cáo tiến độ](bao_cao_tien_do.md). Phân công cleaning theo yêu cầu mới: Nguyên phụ trách chính, Thuận kiểm tra chéo; không suy ra Proposal lịch sử đã được sửa hoặc nhóm đã duyệt cấu hình.
+
 ## 1.1. Bối cảnh và lý do chọn đề tài
 
 Dữ liệu giao dịch lưu lại thời điểm mua, mặt hàng, số lượng, đơn giá và định danh
@@ -91,7 +93,7 @@ phân tích và khả năng tái lập, chưa đặt ra cam kết hiệu quả k
 5. Dự kiến trực quan hóa kết quả, đối chiếu độ nhạy với chính sách tiền xử lý
    và tổng hợp các giới hạn khi nhận diện nhóm khách hàng giá trị cao.
 
-Khám phá dữ liệu hiện được thể hiện trong [notebook EDA](../notebooks/01_eda/eda_raw_moi.ipynb).
+Khám phá dữ liệu hiện được thể hiện trong [notebook EDA](../notebooks/01_eda/eda.ipynb).
 Các mục tiêu còn lại là hướng thực hiện tiếp theo; chưa có kết quả mô hình được
 xác minh từ raw duy nhất để báo cáo.
 
@@ -225,7 +227,7 @@ cần nhóm xác nhận** trước khi ghép báo cáo chung:
 - [README dự án](../README.md), [requirements.txt](../requirements.txt),
   thư mục `src/`, `configs/` và các notebook hiện có: căn cứ cho trạng thái
   triển khai và các hướng phương pháp; chưa có kế hoạch chi tiết hoàn chỉnh.
-- [EDA từ raw duy nhất](../notebooks/01_eda/eda_raw_moi.ipynb): cấu trúc,
+- [EDA từ raw duy nhất](../notebooks/01_eda/eda.ipynb): cấu trúc,
   chất lượng, phép đếm và kiểm tra nhất quán. SHA-256 nguồn:
   `43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d`.
 

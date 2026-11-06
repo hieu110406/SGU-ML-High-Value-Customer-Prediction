@@ -1,247 +1,223 @@
 # Phân khúc khách hàng bằng RFM và hành vi mua hàng
 
-> **Nguồn raw duy nhất của dự án:** `data/raw/Online Retail.xlsx` (1 sheet).
-> Dùng [notebook EDA](notebooks/01_eda/eda_raw_moi.ipynb),
-> [hướng dẫn chạy](notebooks/01_eda/README.md), [báo cáo EDA](reports/bao_cao_eda_raw_moi.md)
-> và [đề xuất sau EDA](reports/de_xuat_sau_eda.md).
-> Dữ liệu từng được chọn nhầm và mọi kết quả tính từ dữ liệu đó **không hợp lệ cho dự án**.
-> Các sản phẩm thử nghiệm còn lưu cần được tính lại; mã tiền xử lý chưa tương thích trực tiếp
-> schema raw. Xem [kiểm kê nguồn](reports/kiem_ke_eda_raw_moi.md) và [quy ước dự án](AGENTS.md).
+Đồ án môn **Máy học**, nhóm **15 – DCT124C3**, Trường Đại học Sài Gòn.
+Giảng viên: Đỗ Như Tài. Thành viên: Nguyễn Quốc An, Nguyễn Trung Hiếu,
+Ngô Nguyên và Lê Nam Thuận.
 
-Đồ án cuối kỳ môn **Máy học** — Trường Đại học Sài Gòn, Khoa Công nghệ Thông tin.
-**Nhóm 15 – DCT124C3** · Giảng viên hướng dẫn: **Đỗ Như Tài**
+Dự án tổng hợp giao dịch thành đặc trưng khách hàng rồi phân cụm để mô tả giá trị
+mua lịch sử. Monetary không phải lợi nhuận, giá trị vòng đời hoặc dự báo tương lai.
+Phạm vi lần bàn giao này dừng ở K-Means baseline.
 
-| MSSV | Họ và tên | Ký hiệu |
-|---|---|---|
-| 3124411003 | Nguyễn Quốc An (trưởng nhóm) | A |
-| 3124411093 | Nguyễn Trung Hiếu | H |
-| 3124411191 | Ngô Nguyên | N |
-| 3124411296 | Lê Nam Thuận | T |
+**Trạng thái:** EDA từ raw hiện tại được tái sử dụng và kiểm chứng. Ngày 06/11/2026,
+người dùng cho phép chạy cấu hình **thử nghiệm riêng**, chưa phải quyết định chính
+thức của toàn nhóm. Clean/feature thử nghiệm nằm trong `experiments/baseline/`,
+không thay thế `data/processed/`. Xem [báo cáo tiến độ](reports/bao_cao_tien_do.md).
 
-> **Tình trạng:** EDA đã chạy với raw duy nhất. Chính sách cleaning và bộ đặc trưng
-> chưa được nhóm chốt; tiền xử lý chưa tương thích trực tiếp raw này và chưa có kết quả
-> mô hình được xác minh từ raw này. Các phần khác là công việc đang phát triển.
+## Dữ liệu và phiên bản
 
----
+Nguồn duy nhất: [Online Retail.xlsx](data/raw/Online%20Retail.xlsx), một sheet
+`Online Retail`. Mô tả nguồn: [UCI Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail),
+DOI [10.24432/C5BW33](https://doi.org/10.24432/C5BW33).
 
-## 1. Giới thiệu
-
-Doanh nghiệp bán lẻ trực tuyến ghi nhận lượng giao dịch lớn từ những nhóm khách hàng
-có hành vi mua rất khác nhau. Dự án chuyển dữ liệu giao dịch ở cấp dòng hóa đơn thành
-đặc trưng ở cấp khách hàng (RFM và RFM mở rộng), rồi dùng các thuật toán phân cụm
-để tìm các nhóm khách hàng có thể diễn giải, trong đó có nhóm giá trị giao dịch lịch sử cao.
-
-**Loại bài toán:** gom cụm (học không giám sát), dữ liệu không có nhãn.
-**Đầu vào:** giao dịch bán lẻ (`InvoiceNo`, `Quantity`, `UnitPrice`, `CustomerID`, `InvoiceDate`, ...).
-**Đầu ra:** nhãn cụm của từng khách hàng và hồ sơ mô tả (cluster profile) của mỗi cụm.
-
-**Câu hỏi nghiên cứu**
-
-1. Có thể chia khách hàng thành bao nhiêu nhóm có ý nghĩa dựa trên RFM và hành vi mua hàng?
-2. Trong K-Means, Hierarchical Clustering và DBSCAN, thuật toán nào cho chất lượng cụm tốt nhất và dễ diễn giải nhất?
-3. Mỗi cụm có đặc điểm gì và nên áp dụng chiến lược kinh doanh nào?
-
-> **Lưu ý về phạm vi:** tên repository có từ "Prediction", nhưng hướng thực hiện là
-> **phân cụm dựa trên lịch sử**, không phải dự báo giá trị tương lai. Phân cụm RFM
-> không tự chứng minh khả năng dự báo. Nhóm "giá trị cao" được xác định từ hồ sơ cụm
-> (Monetary, Frequency, tỷ trọng doanh thu), chưa có ngưỡng nào được chốt.
-
-## 2. Dữ liệu
-
-- **Raw duy nhất:** `data/raw/Online Retail.xlsx`, sheet `Online Retail`.
-- **Nguồn mô tả:** [UCI Online Retail](https://archive.ics.uci.edu/dataset/352/online+retail),
-  giao dịch của nhà bán lẻ trực tuyến tại Anh; đơn giá GBP theo mô tả nguồn.
-- **SHA-256:** `43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d`.
-- **Giấy phép:** đối chiếu điều khoản trên trang nguồn khi tái sử dụng.
-
-### Các thuộc tính
-
-| Cột | Ý nghĩa |
+| Thuộc tính | Giá trị |
 |---|---|
-| `InvoiceNo` | Mã chứng từ; tiền tố `C` là dấu hiệu hủy |
-| `StockCode` | Mã hàng (có cả mã dịch vụ/điều chỉnh như `POST`, `D`, `M`) |
-| `Description` | Tên hàng |
-| `Quantity` | Số lượng trên dòng (có thể âm) |
-| `InvoiceDate` | Thời điểm lập hóa đơn |
-| `UnitPrice` | Đơn giá (GBP/đơn vị) |
-| `CustomerID` | Mã khách hàng (có dòng thiếu) |
-| `Country` | Quốc gia của khách hàng |
+| SHA-256 | `43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d` |
+| Kích thước | 23.715.344 byte |
+| Dòng × cột | 541.909 × 8 |
+| Thời gian nguồn | 01/12/2010 08:26 – 09/12/2011 12:50; không có múi giờ |
+| Chứng từ / khách có mã / quốc gia | 25.900 / 4.372 / 38 |
+| Thiếu CustomerID / Description | 135.080 / 1.454 dòng |
+| Dòng trùng dư trên đủ 8 cột | 5.268 |
 
-### Số liệu thô đã kiểm tra từ raw duy nhất
+Schema: `InvoiceNo`, `StockCode`, `Description`, `Quantity`, `InvoiceDate`,
+`UnitPrice`, `CustomerID`, `Country`. Đơn giá GBP theo UCI. Một dòng là một dòng
+hàng/chứng từ, không phải một hóa đơn hoàn chỉnh hay một khách hàng.
 
-| Chỉ tiêu | Giá trị |
-|---|---|
-| Số sheet / số dòng / số cột | 1 / 541.909 / 8 |
-| Thời gian quan sát | 01/12/2010 08:26 – 09/12/2011 12:50 |
-| Mã khách hàng quan sát được | 4.372 |
-| Mã chứng từ duy nhất, gồm C | 25.900 |
-| Số nhãn quốc gia | 38 |
-| Dòng thiếu `CustomerID` | 135.080 |
-| Dòng trùng dư trên 8 cột | 5.268 |
+Kiểm tra hash từ `project/`:
 
-Đây là thống kê raw, chưa phải quy mô tập huấn luyện. Chi tiết, đơn vị và giới hạn
-được tính từ cùng file trong [báo cáo EDA](reports/bao_cao_eda_raw_moi.md).
+```powershell
+Get-FileHash -LiteralPath 'data/raw/Online Retail.xlsx' -Algorithm SHA256
+```
 
-## 3. Cấu trúc thư mục
+```bash
+sha256sum 'data/raw/Online Retail.xlsx'
+```
 
-Toàn bộ mã nằm trong thư mục `project/`.
+Không sửa raw. Sản phẩm từ `online_retail_II.xlsx` hoặc không xác minh được nguồn
+không được dùng làm đầu vào/kết quả của raw hiện tại.
+
+## Cấu trúc hiện tại
 
 ```text
 project/
-├── app/                  # Demo: backend.py, streamlit_app.py
-├── configs/              # YAML cấu hình thử nghiệm dự kiến
-├── data/
-│   ├── raw/              # Dữ liệu gốc, không chỉnh sửa
-│   ├── processed/        # Sản phẩm không hợp lệ với raw duy nhất; chưa sử dụng
-│   └── feature/          # Sau feature engineering (RFM, RFM mở rộng)
-├── experiments/          # Kết quả EDA và phần việc thử nghiệm
-├── notebooks/
-│   ├── 01_eda/                 # eda_raw_moi
-│   ├── 02_baseline_kmeans/     # kmeans_v1_elbow, kmeans_v2_silhouette
-│   ├── 03_clustering_eval/     # hierarchical_v1_ward, dbscan_v1_eps_grid
-│   ├── 04_pca_profiling/       # pca_v1, profiling_v1
-│   └── 05_data_processing/
-├── reports/              # Báo cáo, slide (reports/slides/)
-├── results/
-│   └── final/            # Kết quả bản cuối dùng trong báo cáo
-├── src/                  # Mã Python hóa từ notebook; là nền cho backend
-│   ├── preprocessing.py  # Làm sạch dữ liệu
-│   ├── features.py       # RFM, RFM mở rộng, chuẩn hóa
-│   ├── models.py         # KMeans, Hierarchical, DBSCAN
-│   ├── evaluation.py     # Silhouette, Davies-Bouldin, Calinski-Harabasz, độ ổn định
-│   ├── visualization.py  # PCA, biểu đồ cụm, cluster profiling
-│   ├── excel_logger.py   # Ghi nhật ký thực nghiệm ra Excel
-│   └── run_experiment.py # Điểm vào chạy một thực nghiệm theo YAML
+├── AGENTS.md
+├── README.md
 ├── requirements.txt
-└── README.md
+├── data/
+│   ├── raw/Online Retail.xlsx
+│   ├── processed/data_clean.csv.gz       # Legacy, chưa đủ bằng chứng provenance
+│   └── feature/                          # Giữ cấu trúc của nhóm
+├── notebooks/
+│   ├── 01_eda/
+│   │   ├── eda.ipynb                     # Notebook EDA chính
+│   │   ├── eda_raw_analysis.py
+│   │   ├── build_eda_raw_notebook.py
+│   │   └── figures/raw/
+│   ├── 02_baseline_kmeans/               # Notebook khung; baseline chạy qua CLI
+│   ├── 03_clustering_eval/               # Chưa triển khai trong phạm vi này
+│   ├── 04_pca_profiling/                 # Khung công việc sau baseline
+│   └── 05_data_processing/               # Notebook tiền xử lý lịch sử
+├── src/                                  # Cleaning, features, models, đánh giá, runner
+├── configs/kmeans_k4.yaml                 # Tên lịch sử; thực khảo sát k=2…10
+├── experiments/
+│   ├── eda_raw_moi/ket_qua_eda.xlsx
+│   ├── eda_raw_moi/verification/
+│   ├── baseline/                         # Đầu ra thử nghiệm riêng
+│   └── form2_manual_behavior_raw_survey/  # Lịch sử, không dùng số liệu
+├── reports/
+│   ├── bao_cao_tien_do.md                 # Báo cáo hợp nhất hiện hành
+│   ├── bao_cao_eda.md                     # Báo cáo EDA sinh từ mã
+│   ├── de_xuat_sau_eda.md                 # Các lựa chọn cần nhóm xác nhận
+│   ├── kiem_ke_eda.md                     # Kiểm kê lần dựng EDA trước
+│   ├── form2_manual_behavior_features.md  # API/khảo sát lịch sử
+│   ├── chuong_1_gioi_thieu_sprint1_T03.md  # Bản thảo học phần riêng
+│   └── Nhom15_PhanKhucKhachHang_Proposal.docx
+├── tests/
+├── app/                                  # Khung demo; ngoài phạm vi lần này
+└── results/final/                         # Chưa công bố kết quả chính thức
 ```
 
-Quy trình làm việc: khám phá và chọn tham số trong `notebooks/`, sau đó chuyển phần
-đã ổn định sang `src/`, ghi tham số tốt nhất vào `configs/`, chạy bằng
-`run_experiment.py` và lưu kết quả vào `experiments/`, bản cuối vào `results/final/`.
+## Cài đặt
 
-## 4. Cài đặt
+Dùng **Python 3.12**; lần kiểm tra dùng Python 3.12.15. Các lệnh chạy từ `project/`.
+Tạo một môi trường `.venv`, không phụ thuộc `.venv-eda` cũ của máy tác giả.
 
-Yêu cầu: **Python 3.12** (phiên bản dùng để kiểm tra EDA). Thư viện trong
-`requirements.txt`: numpy, pandas, scikit-learn, scipy, matplotlib, seaborn, PyYAML,
-openpyxl, jupyter, streamlit.
-
-**Windows (PowerShell)**
+Windows PowerShell:
 
 ```powershell
-git clone https://github.com/hieu110406/SGU-ML-High-Value-Customer-Prediction.git
-cd SGU-ML-High-Value-Customer-Prediction\project
 py -3.12 -m venv .venv
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+& .venv/Scripts/python.exe -m pip install -r requirements.txt
 ```
 
-**Linux / macOS**
+Linux/macOS:
 
 ```bash
-git clone https://github.com/hieu110406/SGU-ML-High-Value-Customer-Prediction.git
-cd SGU-ML-High-Value-Customer-Prediction/project
 python3.12 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
 ```
 
-Kiểm tra dữ liệu đúng phiên bản (từ thư mục `project/`):
+Trong các ví dụ sau, `python` là Python của môi trường vừa tạo. Trên PowerShell
+có thể thay bằng `& .venv/Scripts/python.exe`; trên Linux/macOS dùng `.venv/bin/python`.
+Phiên bản thư viện thực tế được ghi trong workbook kết quả.
+
+## Luồng chạy
+
+`Raw → EDA → cấu hình có trạng thái → cleaning có log → features/RFM → scaling → K-Means → đánh giá`
+
+### EDA
+
+Mở [eda.ipynb](notebooks/01_eda/eda.ipynb), chọn đúng kernel và
+**Restart Kernel → Run All**, hoặc:
 
 ```bash
-# Linux / macOS
-sha256sum "data/raw/Online Retail.xlsx"
-# Windows PowerShell
-Get-FileHash -LiteralPath 'data/raw/Online Retail.xlsx' -Algorithm SHA256
+python -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 notebooks/01_eda/eda.ipynb
+python -X utf8 experiments/eda_raw_moi/verification/validate_independent.py
+python -X utf8 experiments/eda_raw_moi/verification/verify_delivery.py
 ```
 
-Kết quả phải trùng với giá trị SHA256 ở mục 2.
+EDA ghi một [workbook](experiments/eda_raw_moi/ket_qua_eda.xlsx),
+[hình](notebooks/01_eda/figures/raw/) và [báo cáo EDA](reports/bao_cao_eda.md).
+Script kiểm tra cập nhật sheet kiểm chứng của cùng workbook. Chạy lại thay các
+đầu ra EDA này; không tạo clean chính thức. Chỉ chạy `build_eda_raw_notebook.py`
+khi sửa cấu trúc notebook vì việc dựng lại xóa output.
 
-## 5. Cách chạy
+### Kiểm tra raw và từng bước
 
-### 5.1. EDA raw hiện tại
-
-Từ thư mục `project/`, chạy lại toàn bộ notebook (đọc Excel có thể mất vài phút):
-
-```powershell
-.\.venv-eda\Scripts\python.exe -X utf8 -m nbconvert --execute --to notebook --inplace --ExecutePreprocessor.timeout=1800 notebooks\01_eda\eda_raw_moi.ipynb
+```bash
+python -m src.run_experiment --config configs/kmeans_k4.yaml --stage audit
 ```
 
-Hoặc mở tương tác bằng `.\.venv-eda\Scripts\python.exe -m jupyter lab notebooks/01_eda/eda_raw_moi.ipynb`,
-chọn đúng kernel của `.venv-eda`, rồi **Restart Kernel → Run All**. Notebook chỉ đọc
-`data/raw/`, không ghi vào dữ liệu gốc và có các `assert` kiểm tra nhất quán cuối notebook.
+`audit` chỉ đọc và in kiểm tra raw. Có thể chạy riêng `--stage clean` hoặc
+`--stage features` trên thư mục đầu ra chưa tồn tại để kiểm tra bước tương ứng.
+Các stage này là lựa chọn thay thế cho lần chạy toàn bộ, không cần chạy tuần tự.
+Log cleaning ghi dòng, hóa đơn và khách trước/sau từng bước; không cộng các cờ
+chồng lấn.
 
-### 5.2. Chạy một thực nghiệm *(dự kiến — chưa triển khai)*
+### Baseline K-Means từ raw
 
 ```bash
 python -m src.run_experiment --config configs/kmeans_k4.yaml
 ```
 
-Runner sẽ đọc YAML, chạy pipeline (làm sạch → RFM → chuẩn hóa → phân cụm → đánh giá),
-lưu kết quả vào `experiments/<ngày>_<tên>/` và ghi một dòng vào nhật ký Excel
-trong `results/`. Hiện lệnh này sẽ báo `NotImplementedError`.
-
-### 5.3. Ứng dụng demo *(dự kiến — chưa triển khai)*
+Để tái lập một lần chạy baseline đã hoàn thành trong cùng thư mục:
 
 ```bash
-streamlit run app/streamlit_app.py
+python -m src.run_experiment --config configs/kmeans_k4.yaml --stage baseline --overwrite
 ```
 
-Demo dự kiến nạp mô hình đã chọn, hiển thị cụm trên PCA 2D/3D, hồ sơ từng cụm và
-gán cụm cho khách hàng mới qua `app/backend.py`.
+`--overwrite` chỉ thay các file đầu ra do runner quản lý trong thư mục thực nghiệm;
+không xóa cả thư mục. Runner từ chối ghi đè đầu ra dở dang không xác minh được nguồn.
+Tên `kmeans_k4.yaml` được giữ để tránh phá liên kết; nội dung thực khảo sát
+**k=2…10**, không áp đặt k=4. Cấu hình thử nghiệm ngày 06/11/2026:
 
-## 6. Phương pháp (kế hoạch)
+- Loại thiếu mã khách, chứng từ C, Quantity/UnitPrice không dương và bản sao hoàn toàn
+  trên 8 cột; giữ mã dịch vụ, khách mua sỉ và ngoại lệ.
+- Tất cả quốc gia; cửa sổ `[2010-12-01, 2011-12-10)`.
+- R là số ngày lịch từ ngày mua cuối đến 10/12/2011; F là số InvoiceNo mua duy nhất;
+  M là tổng Quantity × UnitPrice dòng mua giữ lại, chưa đối trừ trả hàng.
+- Chỉ dùng RFM; `log1p` rồi `StandardScaler`; seed 42, n_init=20.
+- Chọn k có Silhouette lớn nhất trên toàn bộ khách trong phạm vi khảo sát; dùng
+  Elbow, Davies–Bouldin, kích thước và hồ sơ cụm để diễn giải. Không khẳng định tối ưu tuyệt đối.
 
-1. **Làm sạch:** thảo luận cách xử lý `CustomerID` thiếu, chứng từ `C`, `Quantity`/`UnitPrice`
-   bất thường và dòng trùng. Mỗi phương án cần ghi lý do và số dòng bị ảnh hưởng.
-2. **Đặc trưng:** RFM chuẩn (Recency, Frequency = số hóa đơn, Monetary = tổng chi tiêu) và RFM mở rộng
-   (giá trị đơn trung bình, số sản phẩm khác nhau, số lượng trung bình mỗi đơn, tỷ lệ hoàn trả, khoảng cách giữa hai lần mua).
-   So sánh các phương án biến đổi và scaling phù hợp; chưa mặc định chốt `log1p` hay scaler.
-3. **Mô hình:** K-Means trên RFM làm **baseline** (chọn k bằng Elbow và Silhouette, k từ 2 đến 10),
-   Hierarchical (Ward, dendrogram, thử các kiểu liên kết) và DBSCAN (chọn `eps` bằng k-distance, thử nhiều `min_samples`).
-   PCA dùng để trực quan hóa và khảo sát ảnh hưởng đến chất lượng cụm.
-4. **Đánh giá:** Silhouette (độ đo chính), Davies-Bouldin, Calinski-Harabasz; cluster profiling
-   (RFM trung bình, kích thước cụm, tỷ trọng doanh thu); đối chiếu với phân khúc RFM theo phân vị
-   (luật thủ công) để xem giá trị tăng thêm của học máy; so sánh RFM với RFM mở rộng, có/không PCA.
-5. **Độ ổn định:** thiết kế cửa sổ thời gian phù hợp dữ liệu từ 12/2010 đến 12/2011 và thử nhiều `random_state`; không coi hai năm lịch có cùng thời lượng quan sát.
+Đầu ra trong `experiments/baseline/`:
 
-**Kiểm soát rò rỉ dữ liệu:** ngày tham chiếu và cửa sổ quan sát của RFM phải được cố định
-trước khi tính đặc trưng; `StandardScaler` chỉ fit trên tập dùng để phân cụm, sau đó mới transform
-tập còn lại. Chưa có ngày tham chiếu hay giá trị `random_state` nào được chốt trong repository.
-
-## 7. Tiến độ và phần đã triển khai
-
-| Hạng mục | Trạng thái |
+| File | Nội dung |
 |---|---|
-| Cấu trúc thư mục, `requirements.txt`, `.gitignore` | Đã có |
-| Dữ liệu thô `data/raw/` | Đã có |
-| `notebooks/01_eda/eda_raw_moi.ipynb` | EDA từ raw duy nhất; xem [hướng dẫn](notebooks/01_eda/README.md) |
-| Bản thảo Chương 1 (`reports/chuong_1_gioi_thieu_sprint1_T03.md`), Proposal | Đã có |
-| `src/*.py`, `configs/*.yaml`, `app/*.py` | Có mã/cấu hình từng phần; chưa xác minh toàn bộ với raw duy nhất |
-| K-Means, Hierarchical, DBSCAN, PCA, profiling | Notebook rỗng |
-| Báo cáo đầy đủ, slide, demo Streamlit | Chưa bắt đầu |
+| `results.xlsx` | Metadata, raw, log clean, features, kiểm tra RFM, scaling, metric, hồ sơ cụm |
+| `cleaned.csv.gz` | Dòng mua sau clean, chỉ là dữ liệu thử nghiệm riêng |
+| `assignments.csv.gz` | CustomerID, RFM, đặc trưng thủ công và Cluster |
+| `artifacts.joblib` | Biến đổi, scaler và mô hình để tái lập |
+| `metrics.png` | Elbow, Silhouette, Davies–Bouldin theo k |
+| `cluster_profiles.png` | Hồ sơ cụm |
+| `feature_distributions.png` | Phân phối đặc trưng trước/sau biến đổi |
 
-Lịch chi tiết 02/11 – 18/11/2026 (8 sprint, 33 đầu việc) nằm trong tệp theo dõi tiến độ của nhóm.
+Chi tiết công thức, số liệu thực chạy và giới hạn ở [báo cáo tiến độ](reports/bao_cao_tien_do.md).
 
-## 8. Giới hạn đã biết
+### Kiểm tra mã
 
-- Dữ liệu là giao dịch từ 12/2010 đến 12/2011 của một nhà bán lẻ tại Anh; kết luận không mặc nhiên đúng cho thời điểm khác hay doanh nghiệp khác.
-- Không có chi phí, biên lợi nhuận hay nhân khẩu học, nên Monetary là giá trị giao dịch, không phải lợi nhuận hay giá trị vòng đời.
-- Tháng cuối chỉ có dữ liệu đến 09/12/2011.
-- Có mã hàng dịch vụ/điều chỉnh (`POST`, `D`, `M`, `B`, ...) cần phân loại trước khi diễn giải là hàng hóa.
-- Không có múi giờ; thời gian được giữ nguyên theo nguồn.
-- Dòng thiếu `CustomerID` không thể gán về khách hàng cụ thể; cách xử lý đang chờ nhóm thống nhất.
-- `data/processed/` và `experiments/form2_manual_behavior_raw_survey/` có sản phẩm từ dữ liệu chọn nhầm, không hợp lệ cho raw duy nhất; giữ để người thực hiện đối chiếu, không dùng làm đầu vào/kết quả dự án.
-- `src/preprocessing.py` chưa tương thích schema raw; không chạy cleaning trước khi nhóm thống nhất và cập nhật.
+Từ **gốc repository**:
 
-## 9. Tái lập và trung thực học thuật
+```bash
+python -m unittest discover -s project/tests -v
+```
 
-- Dữ liệu gốc không bị sửa; có SHA256 để kiểm tra.
-- Mỗi lần chạy thực nghiệm lưu riêng trong `experiments/`, không ghi đè.
-- Mọi tham số tốt nhất được lưu trong `configs/` để chạy lại.
-- Test set không dùng để chọn mô hình hay tinh chỉnh siêu tham số.
-- **Công cụ AI hỗ trợ:** nhóm ghi rõ phần nào có sử dụng công cụ AI (viết mã, soạn thảo, rà soát) trong báo cáo, theo quy định của học phần. *(Thành viên cập nhật mục này khi có sử dụng.)*
+Baseline đánh giá mô tả trong cùng cửa sổ lịch sử, chưa có tập kiểm định độc lập.
+Khi đánh giá theo thời gian sau này, chỉ fit phép biến đổi trên tập phát triển.
+Không dùng Accuracy, Precision hoặc Recall cho phân cụm không có nhãn thật.
 
-## 10. Tài liệu tham khảo
+## Tài liệu và phần việc tiếp theo
 
-- Chen, D. *Online Retail* [Dataset]. UCI Machine Learning Repository. https://archive.ics.uci.edu/dataset/352/online+retail
-- Pedregosa, F. et al. (2011). Scikit-learn: Machine Learning in Python. *Journal of Machine Learning Research*, 12, 2825–2830.
-- Các tài liệu lý thuyết về RFM và thuật toán phân cụm: bổ sung theo Chương 2 của báo cáo.
+- [Báo cáo tiến độ](reports/bao_cao_tien_do.md): kiểm tra ban đầu, quyết định thử nghiệm,
+  công thức, kết quả, kiểm thử và các điểm chờ nhóm xác nhận.
+- [EDA](reports/bao_cao_eda.md) và [workbook bằng chứng](experiments/eda_raw_moi/ket_qua_eda.xlsx):
+  tập mua khảo sát EDA giữ trùng nên quy mô khác clean baseline.
+- [Đề xuất sau EDA](reports/de_xuat_sau_eda.md): phương án chính thức còn chờ nhóm chốt.
+- [Quy ước dữ liệu](AGENTS.md): raw bất biến, không dùng kết quả từ nguồn chọn nhầm.
+- `data/processed/` là sản phẩm legacy thiếu SHA/quy tắc đã được chốt, chưa dùng làm
+  bằng chứng baseline hiện tại. Log có tên/số dòng của raw hiện tại nên không kết
+  luận nó từ nguồn chọn nhầm. Form 2 có bằng chứng dùng raw sai; notebook tiền xử lý
+  cũ giữ để tác giả đối chiếu. Chapter 1/Proposal giữ chức năng lịch sử, chưa sửa
+  thành báo cáo kết quả cuối cùng.
+- Hierarchical, DBSCAN, so sánh ít nhất hai mô hình theo yêu cầu học phần, demo và
+  báo cáo cuối kỳ thuộc công việc sau baseline. Chưa hoàn thành toàn bộ đề tài.
+
+## Nguồn và hỗ trợ AI
+
+- Chen, D. [Online Retail, UCI](https://archive.ics.uci.edu/dataset/352/online+retail).
+- Pedregosa et al. (2011), [Scikit-learn: Machine Learning in Python](https://jmlr.org/papers/v12/pedregosa11a.html).
+- Tài liệu [K-Means](https://scikit-learn.org/stable/modules/generated/sklearn.cluster.KMeans.html),
+  [StandardScaler](https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html),
+  [Silhouette](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html).
+- Codex hỗ trợ rà soát, sửa pipeline, kiểm thử và soạn tài liệu ngày 06/11/2026.
+  Nhóm cần kiểm tra, hiểu mã và ghi nhận hỗ trợ AI theo quy định học phần; hỗ trợ AI
+  không thay thế quyết định nghiệp vụ của nhóm.

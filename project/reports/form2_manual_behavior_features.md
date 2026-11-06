@@ -16,13 +16,15 @@ Form 2 trước đây. Các bảng kèm Form 2 là **khảo sát thử nghiệm 
 thô**, không phải đầu ra tiền xử lý hoặc bảng đặc trưng chính thức.
 
 **Phạm vi hiện tại:** xem [hướng dẫn EDA](../notebooks/01_eda/README.md) và
-[báo cáo EDA](bao_cao_eda_raw_moi.md), được tính từ raw duy nhất. Mô tả API và
+[báo cáo EDA](bao_cao_eda.md), được tính từ raw duy nhất. Mô tả API và
 ví dụ tổng quát bên dưới được giữ để tác giả rà soát; chúng chưa xác nhận rằng
 pipeline hoặc bộ đặc trưng chính thức đã sẵn sàng cho raw của dự án.
 
+> **Cập nhật 06/11/2026:** API hành vi bên dưới vẫn dùng schema nội bộ `Customer ID`/`Invoice`/`Price`. Luồng baseline mới đọc raw `CustomerID`/`InvoiceNo`/`UnitPrice`, chuyển đổi tên sau clean và bổ sung `build_rfm`; không dùng trực tiếp ví dụ/cột lịch sử làm lệnh chạy raw. Bảng khách xuất baseline đưa khóa về `CustomerID`. Xem [README](../README.md) và [báo cáo tiến độ](bao_cao_tien_do.md) cho luồng hiện hành.
+
 ## Giao diện
 
-`src/features.py` cung cấp 4 hàm thuần, nhận/trả `pandas.DataFrame`, không đọc/ghi tệp:
+Hợp đồng Form 2 ban đầu trong `src/features.py` mô tả 4 hàm thuần, nhận/trả `pandas.DataFrame`, không đọc/ghi tệp:
 
 | Hàm | Đầu vào | Đầu ra |
 |---|---|---|

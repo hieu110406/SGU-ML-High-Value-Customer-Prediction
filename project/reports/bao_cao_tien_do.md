@@ -19,7 +19,7 @@ cây Git ban đầu sạch. Không commit/push trong lần bàn giao này; giữ
 | Cleaning | API lịch sử, processed cũ còn giữ | Chính sách chính thức chưa chốt; schema raw khác API nội bộ; processed thiếu SHA/quy tắc được duyệt | Luồng thử nghiệm có adapter và log, tách đầu ra |
 | Features | API hành vi thuần và test; Form 2 từ nguồn sai | Chưa có RFM baseline xác minh với raw này | Tái sử dụng API, bổ sung RFM và kiểm tra mẫu |
 | Scaling | Mới có các phương án đề xuất | Chưa có scaler đã fit được xác minh | Thử log1p + StandardScaler và lưu tham số |
-| Baseline | Hai notebook khung, runner/cấu hình TODO | Chưa có kết quả từ raw hiện tại | Một CLI raw→baseline, khảo sát k=2…10 |
+| Baseline | Hai notebook khung, runner/cấu hình TODO | Chưa có kết quả từ raw hiện tại | CLI và một notebook chính raw→baseline, khảo sát k=2…10 |
 | README/tài liệu | Tên `*_raw_moi` không tồn tại; môi trường cài/chạy khác nhau | Người mới khó tái lập; kiểm kê Git ghi mốc cũ | Một README chính, một báo cáo tiến độ hiện hành |
 | File cũ/trùng | Form 2, processed, notebook tiền xử lý của thành viên | Không thể xóa chỉ vì không dùng trong baseline | Giữ, cảnh báo nguồn; không đổi cấu trúc phần sau baseline |
 
@@ -245,6 +245,7 @@ thay đổi chính sách hoặc cửa sổ dữ liệu.
 |---|---|
 | Bộ kiểm thử hiện có và bổ sung cho pipeline | 50/50 đạt; gồm Excel giả lập → clean → RFM → scaler → K-Means → lưu/nạp artifact |
 | Notebook EDA chạy lại từ kernel mới | 54/54 code cell, không có output lỗi; 21 hình, 41 bảng thống kê |
+| Notebook baseline chính chạy từ kernel mới | 16/16 code cell, không lỗi; lưu 3 hình; metric của 9 cấu hình k và RFM/nhãn của toàn bộ 4.338 khách khớp artifact CLI; 11 file raw/processed/baseline giữ nguyên SHA-256 |
 | Đối chiếu EDA với phép tính độc lập đọc trực tiếp raw | 399/399 đạt, 0 thất bại; sheet `Kiem_chung_doc_lap` |
 | Kiểm tra bàn giao EDA | Đạt; 87 liên kết, hash báo cáo/mã/hình và PNG nhúng trong notebook khớp; sheet `Kiem_tra_ban_giao` |
 | Rà soát liên kết Markdown toàn dự án | 120 liên kết nội bộ tồn tại; không có ký tự thay thế Unicode trong tài liệu |
@@ -315,8 +316,13 @@ một README; báo cáo hiện hành tổng hợp kết luận và trỏ về c�
 DOCX đọc được qua `word/document.xml`, không có cản trở kỹ thuật trong kiểm tra
 nội dung. Không sửa bố cục Word vì đây là Proposal lịch sử, trong khi lần này tạo
 báo cáo tiến độ hiện hành. Tên notebook/phân công cũ trong DOCX là lịch sử; không
-khẳng định đã đồng bộ hoàn toàn tài liệu Word. Notebook baseline khung vẫn giữ;
-CLI là luồng baseline tương đương có thể theo dõi.
+khẳng định đã đồng bộ hoàn toàn tài liệu Word. Hai notebook baseline khung lịch sử
+vẫn giữ để đối chiếu. Notebook chính
+[baseline_kmeans.ipynb](../notebooks/02_baseline_kmeans/baseline_kmeans.ipynb)
+hợp nhất raw → cleaning → RFM → scaling → K-Means → đánh giá và hồ sơ cụm,
+dùng chung các hàm `src/` với CLI. Notebook tính lại trong bộ nhớ, đối chiếu metric
+và RFM/nhãn từng khách với artifact CLI nếu có; bảng và hình lưu ngay trong output
+notebook. CLI tiếp tục là đường xuất workbook, clean, assignments và mô hình.
 
 ## 11. Sau baseline, nguồn và đóng góp
 

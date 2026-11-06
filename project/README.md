@@ -63,7 +63,8 @@ project/
 │   │   ├── eda_raw_analysis.py
 │   │   ├── build_eda_raw_notebook.py
 │   │   └── figures/raw/
-│   ├── 02_baseline_kmeans/               # Notebook khung; baseline chạy qua CLI
+│   ├── 02_baseline_kmeans/
+│   │   └── baseline_kmeans.ipynb        # Notebook chính: raw → RFM → K-Means → đánh giá
 │   ├── 03_clustering_eval/               # Chưa triển khai trong phạm vi này
 │   ├── 04_pca_profiling/                 # Khung công việc sau baseline
 │   └── 05_data_processing/               # Notebook tiền xử lý lịch sử
@@ -144,6 +145,18 @@ Log cleaning ghi dòng, hóa đơn và khách trước/sau từng bước; khôn
 chồng lấn.
 
 ### Baseline K-Means từ raw
+
+Mở [baseline_kmeans.ipynb](notebooks/02_baseline_kmeans/baseline_kmeans.ipynb),
+chọn kernel của môi trường đã cài ở trên, rồi **Restart Kernel → Run All**.
+Notebook trình bày toàn bộ bước đọc raw, cleaning có log, RFM, scaling, khảo sát
+k=2…10, chọn k và hồ sơ cụm. Bảng/biểu đồ đã lưu ngay trong notebook để mở xem;
+chạy lại tính trong bộ nhớ và đối chiếu với artifact CLI nếu có, không ghi đè
+raw, processed hoặc kết quả CLI. Cần giữ notebook trong repository cùng `src/`,
+cấu hình và raw; notebook không phải tệp độc lập chỉ cần tải riêng để chạy.
+Hai notebook `kmeans_v1_elbow.ipynb` và `kmeans_v2_silhouette.ipynb` là khung lịch sử,
+được giữ để đối chiếu; dùng notebook chính ở trên.
+
+Có thể thực hiện cùng luồng bằng CLI để xuất workbook, dữ liệu và mô hình:
 
 ```bash
 python -m src.run_experiment --config configs/kmeans_k4.yaml

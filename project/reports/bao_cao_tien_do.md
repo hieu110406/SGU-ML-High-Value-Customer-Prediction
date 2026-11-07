@@ -1,8 +1,33 @@
-# Báo cáo tiến độ đến K-Means baseline
+# Báo cáo tiến độ giữa kỳ môn Máy học
 
-**Nhóm 15 – DCT124C3 · Ngày 06/11/2026 · Thử nghiệm riêng, chưa phải cấu hình chính thức của nhóm.**
+**Đề tài:** Phân khúc khách hàng bằng RFM và hành vi mua hàng trên Online Retail  
+**Nhóm 15 — lớp DCT124C3** · **Giảng viên:** Đỗ Như Tài  
+**Phiên bản đối chiếu:** commit da523e90f85f7ab2b00f080ffa1ebc04149df191, ngày 07/11/2026. Kết quả baseline là thử nghiệm ngày 06/11, chưa có bằng chứng chính sách được nhóm phê duyệt.
 
-## 1. Bối cảnh, phạm vi và kiểm tra ban đầu
+## 1. Thông tin đề tài, thành viên và tiến độ
+
+### 1.1. Tóm tắt
+
+Dự án xây dựng đặc trưng khách hàng và phân cụm không giám sát trên dữ liệu giao dịch Online Retail. Nhóm đã thực hiện EDA, thử tiền xử lý và huấn luyện K-Means baseline với RFM, log1p và StandardScaler. Trong lần thử nghiệm trên 4.338 khách, k=2 đạt Silhouette 0,432509 cao nhất trong khoảng k=2–10. Đây là mô tả lịch sử, chưa chứng minh khả năng dự đoán giá trị tương lai.
+
+Notebook feature của nhóm hiện ghi 4.327 khách theo chính sách xử lý khác. Chưa thể xem hai luồng là một pipeline thống nhất; xem mục 7.1.
+
+### 1.2. Thành viên và đóng góp
+
+Danh sách theo [README](../README.md). Nhóm cần xác nhận MSSV và công việc đã trực tiếp hoàn thành trước khi nộp.
+
+| Thành viên | Phân công hoặc bằng chứng ghi nhận | Cần xác minh |
+|---|---|---|
+| Nguyễn Quốc An | Có tên trong danh sách nhóm. | MSSV và công việc thực tế. |
+| Nguyễn Trung Hiếu | Có tên trong danh sách nhóm. | MSSV và công việc thực tế. |
+| Ngô Nguyên — 3124411191 | Tác giả bản thảo T03 và Form 2; được ghi nhận phụ trách chính cleaning. | Công việc đã hoàn thành. |
+| Lê Nam Thuận | Được ghi nhận kiểm tra chéo cleaning theo phân công mới. | MSSV và tình trạng kiểm tra chéo. |
+
+### 1.3. Bài toán, đầu vào và đầu ra
+
+Đầu vào là các dòng hóa đơn gồm mã khách, thời gian, lượng, giá, mã hàng và quốc gia. Đầu ra là bảng đặc trưng cấp khách, nhãn cụm và mô tả RFM theo cụm để khảo sát hành vi. Bài toán học không giám sát không có nhãn phân khúc thật; CustomerID là khóa, không đưa vào khoảng cách. Phân cụm lịch sử không tự dự báo lợi nhuận hay hiệu quả marketing.
+
+## 2. Bối cảnh, mục tiêu và phạm vi
 
 Mục tiêu là chuyển giao dịch thành một bảng khách có khóa duy nhất, tạo RFM,
 chuẩn hóa và chạy baseline phân cụm có thể tái lập. Phạm vi dừng ở K-Means; chưa
@@ -10,7 +35,7 @@ hoàn thành toàn bộ đề tài yêu cầu tối thiểu hai mô hình và so
 sử không tự chứng minh khả năng dự đoán giá trị tương lai, lợi nhuận hay giá trị vòng đời.
 
 Trước khi sửa: nhánh `main`, HEAD `af0817e1a7101a7fb5044c2fe6d26e19cf8a8531`,
-cây Git ban đầu sạch. Không commit/push trong lần bàn giao này; giữ thay đổi trong workspace.
+cây Git ban đầu sạch. Tại thời điểm bàn giao cũ, thay đổi chưa commit; đây là mô tả lịch sử, không phản ánh trạng thái Git hiện nay.
 
 | Hạng mục | Trạng thái thực tế trước sửa | Vấn đề | Phương án |
 |---|---|---|---|
@@ -25,7 +50,7 @@ cây Git ban đầu sạch. Không commit/push trong lần bàn giao này; giữ
 
 Bảng trên ghi trạng thái trước sửa. Notebook có output không tự chứng minh phiên bản hiện tại chạy đúng.
 
-## 2. Dữ liệu và nguồn
+## 3. Mô tả dữ liệu
 
 Raw duy nhất: [Online Retail.xlsx](../data/raw/Online%20Retail.xlsx),
 1 sheet `Online Retail`, 23.715.344 byte.
@@ -65,7 +90,7 @@ nguồn/quy tắc được duyệt; log có tên/số dòng của raw hiện t�
 chứng kết luận nó dùng nguồn sai. Giữ nguyên và không dùng làm đầu vào/bằng chứng
 baseline hiện tại; không suy từ nhãn cảnh báo lịch sử thành kết luận provenance mới.
 
-## 3. EDA và tác động đến phân cụm
+## 4. Khám phá và trực quan hóa dữ liệu
 
 Bằng chứng chi tiết: [báo cáo EDA](bao_cao_eda.md),
 [notebook](../notebooks/01_eda/eda.ipynb),
@@ -91,7 +116,7 @@ Các hình trên là EDA giữ trùng, không lấy quy mô này thay quy mô cl
 Phân tích đơn biến, thời gian, quốc gia, hai biến/đa biến và heatmap Pearson/Spearman
 có số cặp quan sát nằm trong báo cáo EDA. Tương quan không chứng minh nhân quả.
 
-## 4. Quyết định và trạng thái phê duyệt
+## 5. Chính sách tiền xử lý thử nghiệm
 
 `AGENTS.md` và đề xuất ngày 05/11/2026 ghi chính sách chính thức còn chờ nhóm.
 Ngày **06/11/2026**, người dùng cho phép **cấu hình thử nghiệm riêng** để kiểm tra
@@ -114,7 +139,7 @@ sửa AGENTS hoặc thay processed chính thức. Cấu hình máy đọc đư�
 Nguyên phụ trách chính cleaning, Thuận kiểm tra chéo theo yêu cầu mới. Proposal
 ghi phân công lịch sử khác; không sửa ngầm bản gốc để giả định nhóm đã duyệt phân công mới.
 
-## 5. Cleaning có log
+## 6. Quy trình tiền xử lý
 
 Luồng mới đọc đúng raw/schema, tạo bản sao, chuẩn hóa kiểu và đổi tên tường minh
 khi gọi API nội bộ: `InvoiceNo→Invoice`, `UnitPrice→Price`, `CustomerID→Customer ID`.
@@ -141,7 +166,7 @@ Clean thử nghiệm lưu riêng `experiments/baseline/cleaned.csv.gz`; log đ�
 sheet `Cleaning_log`. Tập cuối có **392.692 dòng, 18.532 hóa đơn, 4.338 khách**.
 Tổng giá trị mua dương giữ lại **8.887.208,894 GBP** trước làm tròn; không gọi là doanh thu thuần.
 
-## 6. Đặc trưng thủ công và RFM
+## 7. Đặc trưng thủ công và RFM
 
 Mỗi khách có ít nhất một hóa đơn mua hợp lệ trong cửa sổ. P là dòng mua giữ lại,
 I_c là InvoiceNo khác nhau của khách c, t_ref=2011-12-10 00:00.
@@ -178,7 +203,22 @@ khác nhau cho F=7; tổng Quantity×UnitPrice là 4.310 GBP. Khách 12346 có m
 lớn nhưng chứng từ hoàn/hủy đã bị loại, minh họa vì sao M không phải số dư sau trả.
 Chi tiết thời điểm và hai vế phép tính ở sheet `RFM_checks`.
 
-## 7. Scaling và thiết kế baseline
+### 7.1. Hai luồng dữ liệu cần đối chiếu
+
+| Hạng mục | Luồng tiền xử lý và feature của nhóm | Baseline thử nghiệm |
+|---|---|---|
+| Đầu vào tạo feature | [feature.ipynb](../notebooks/05_data_processing/feature.ipynb) đọc data/processed/data_clean.csv. | [baseline_kmeans.ipynb](../notebooks/02_baseline_kmeans/baseline_kmeans.ipynb) đọc raw và tự tạo feature. |
+| Khách có mã | Output notebook ghi 4.327 khách. | Báo cáo lần chạy ghi 4.338 khách. |
+| Mã đặc biệt và ngoại lệ | Log processed ghi loại mã đặc biệt và lọc log-IQR. | Giữ mã dịch vụ và ngoại lệ trong thử nghiệm. |
+| Đầu ra | data/feature/customer_features.csv. | experiments/baseline/assignments.csv.gz và results.xlsx. |
+
+Ví dụ khách 12348 có Monetary 1.437,24 GBP trong file feature nhóm, so với 1.797,24 GBP trong bảng kiểm tra baseline. Hai phạm vi khác nhau; cần đối chiếu từng dòng giao dịch trước khi kết luận nguyên nhân. Baseline hiện không đọc trực tiếp customer_features.csv. Nhóm cần thống nhất quy tắc rồi chạy lại và đồng bộ báo cáo. Notebook feature ghi file processed có đuôi .csv nhưng nội dung nén gzip; cần thống nhất tên và định dạng khi chỉnh pipeline.
+
+### 7.2. Phương án sau EDA
+
+[Đề xuất sau EDA](de_xuat_sau_eda.md) phân tích lựa chọn xử lý thiếu ID, dòng trùng, chứng từ C, mã dịch vụ và ngoại lệ. One-hot hoặc nhóm Country chỉ được xem xét nếu đưa biến này vào mô hình; baseline RFM không dùng biến phân loại và không cần encoding. Có thể so sánh StandardScaler, MinMaxScaler, RobustScaler và log khi phù hợp; lần chạy hiện tại mới dùng log1p và StandardScaler. AOV, số mã hàng, tổng lượng và khoảng cách mua là ứng viên; gap của khách một hóa đơn không xác định, không tự điền 0. Chưa thể định nghĩa return_rate đáng tin cậy từ tiền tố C nếu chưa xác minh và ghép hoàn trả.
+
+## 8. Scaling và thiết kế baseline
 
 Các lựa chọn từ EDA gồm StandardScaler trực tiếp (nhạy đuôi), MinMaxScaler (nhạy
 min/max), RobustScaler (median/IQR nhưng không đảm bảo đối xứng). Thử nghiệm chọn
@@ -196,7 +236,7 @@ lớn nhất trong khảo sát; kết hợp Elbow, Davies–Bouldin, kích thư�
 diễn giải. Không dùng Accuracy/Precision/Recall. Tên `kmeans_k4.yaml` là lịch sử,
 không phải kết luận chọn k=4.
 
-## 8. Kết quả baseline và hồ sơ cụm
+## 9. Kết quả thực nghiệm ban đầu
 
 Mã chạy **`rfm_kmeans_experimental_v1`**; RFM, log1p + StandardScaler, seed 42,
 4.338 khách cho mọi dòng. Nguồn số liệu: sheet `Metrics` trong
@@ -239,7 +279,7 @@ Fit lại cùng seed cho nhãn giống nhau, ARI=1, chênh Inertia=0 trong lần
 Điều này xác nhận tính xác định cùng cấu hình; chưa phải ổn định qua nhiều seed,
 thay đổi chính sách hoặc cửa sổ dữ liệu.
 
-## 9. Kiểm tra và hạn chế
+## 10. Kiểm tra và hạn chế
 
 | Kiểm tra nghiệm thu đã thực hiện | Kết quả |
 |---|---|
@@ -269,11 +309,11 @@ Kiểm thử tự động và hỗ trợ AI không thay thế sự xác nhận �
 
 | Yêu cầu học phần đến baseline | Minh chứng hiện có |
 |---|---|
-| Bài toán và dữ liệu | Mục 1–2, schema, phạm vi, SHA và nguồn UCI |
-| EDA và tiền xử lý | Mục 3–5; notebook, workbook EDA, log clean tuần tự |
-| Feature engineering | Mục 6; công thức, điều kiện, đơn vị, giới hạn và kiểm tra RFM |
-| Thiết kế thực nghiệm | Mục 7; cấu hình, cửa sổ, scaling, seed, metric và giới hạn đánh giá |
-| Baseline thực tế | Mục 8; đủ k=2…10, hồ sơ cụm và hình, artifact có thể nạp lại |
+| Bài toán và dữ liệu | Mục 2–3, schema, phạm vi, SHA và nguồn UCI |
+| EDA và tiền xử lý | Mục 4–6; notebook, workbook EDA, log clean tuần tự |
+| Feature engineering | Mục 7; công thức, điều kiện, đơn vị, giới hạn và kiểm tra RFM |
+| Thiết kế thực nghiệm | Mục 8; cấu hình, cửa sổ, scaling, seed, metric và giới hạn đánh giá |
+| Baseline thực tế | Mục 9; đủ k=2…10, hồ sơ cụm và hình, artifact có thể nạp lại |
 | Tái lập và trung thực học thuật | README, YAML, metadata phiên bản/hash, kiểm thử và ghi nhận AI |
 
 - Chính sách chính thức về thiếu, trùng, C/trả, giá 0, dịch vụ và ngoại lệ chưa
@@ -289,7 +329,19 @@ Kiểm thử tự động và hỗ trợ AI không thay thế sự xác nhận �
 - Cần nhóm chốt tiêu chí “giá trị cao”, cửa sổ/mốc chính thức, hóa đơn nhiều thời
   điểm, phân loại sản phẩm và định nghĩa tỷ lệ trả hàng.
 
-## 10. Sản phẩm, hợp nhất tài liệu và DOCX
+### 10.1. Tổng hợp tiến độ theo yêu cầu giữa kỳ
+
+| Hạng mục | Đã ghi nhận | Công việc còn lại |
+|---|---|---|
+| Bài toán, dữ liệu, EDA | Có mô tả, thống kê, hình, phân tích đơn biến, hai/đa biến và tương quan. | Kiểm tra phạm vi khi dùng số liệu. |
+| Tiền xử lý, feature | Có notebook và đầu ra; hai luồng 4.327 và 4.338 khách khác chính sách. | Nhóm chốt quy tắc và đồng bộ. |
+| Baseline | Có K-Means, metric, hồ sơ cụm và artifact thử nghiệm. | Rà soát cấu hình, độ nhạy và chính sách. |
+| So sánh mô hình | Có notebook khung, chưa thấy so sánh hoàn chỉnh. | Thực hiện thêm mô hình trên cùng dữ liệu và tiêu chí. |
+| Nộp giữa kỳ | Có mã, hình, workbook và tài liệu trong repo. | Rà soát báo cáo Word, slide, nhật ký, nguồn dữ liệu, đóng góp và ZIP. |
+
+Kết quả kiểm thử nêu trên là kết quả được tài liệu dự án ghi lại ở lần chạy trước; việc tổng hợp ngày 07/11 không tự chạy lại pipeline.
+
+## 11. Sản phẩm và minh chứng
 
 Một thư mục `experiments/baseline/`: `results.xlsx`, `cleaned.csv.gz`,
 `assignments.csv.gz`, `artifacts.joblib`, `metrics.png`, `cluster_profiles.png`,
@@ -324,7 +376,7 @@ dùng chung các hàm `src/` với CLI. Notebook tính lại trong bộ nhớ, �
 và RFM/nhãn từng khách với artifact CLI nếu có; bảng và hình lưu ngay trong output
 notebook. CLI tiếp tục là đường xuất workbook, clean, assignments và mô hình.
 
-## 11. Sau baseline, nguồn và đóng góp
+## 12. Kế hoạch tiếp theo và tài liệu tham khảo
 
 Nhóm cần xác nhận chính sách/tái lập chính thức, bổ sung ổn định/độ nhạy, thực hiện
 ít nhất một mô hình khác để so sánh theo yêu cầu học phần; sau đó hoàn thiện demo,
@@ -341,3 +393,9 @@ Người dùng xác định phạm vi và cho phép thử nghiệm; Codex hỗ t
 kiểm thử/thực nghiệm và soạn tài liệu. Nhóm chịu trách nhiệm hiểu mã, rà soát kết
 quả, xác nhận nghiệp vụ và ghi nhận hỗ trợ AI theo quy định học phần. Không ghi
 cá nhân/nhóm đã duyệt khi chưa có bằng chứng.
+
+### Nguồn tổng hợp và sản phẩm nộp
+
+Tài liệu tổng hợp từ [README](../README.md), [báo cáo EDA](bao_cao_eda.md), [đề xuất sau EDA](de_xuat_sau_eda.md), [bản thảo T03](chuong_1_gioi_thieu_sprint1_T03.md), [Form 2](form2_manual_behavior_features.md), [kiểm kê EDA](kiem_ke_eda.md), các notebook tiền xử lý, feature và baseline. Bảng khảo sát Form 2 dùng bộ cũ không được dùng làm số liệu raw hiện tại. Giữ tài liệu nguồn để đối chiếu; dữ liệu lịch sử không đại diện trạng thái hiện tại.
+
+Thông báo Classroom yêu cầu báo cáo DOCX, slide, mã nguồn, nhật ký thực nghiệm, hình gốc và tài nguyên, đóng gói ZIP để nhóm trưởng nộp. Hạn nộp xem trực tiếp trên Classroom. Bản Word trước đó cần cập nhật khác biệt hai luồng và đóng góp thành viên trước khi nộp.

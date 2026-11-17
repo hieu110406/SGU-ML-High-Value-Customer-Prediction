@@ -1,0 +1,39 @@
+{
+  "experiment": "B01-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 2,
+  "pca_variance_kept": 0.9400607165232948,
+  "covariance_type": "full",
+  "k": 4,
+  "bic": 24347.114512230328,
+  "aic": 24200.544028205157,
+  "silhouette": 0.3081966275044551,
+  "dbi": 1.065168264229777,
+  "chi": 2747.576881388927,
+  "min_cluster": 838,
+  "converged": true,
+  "n_iter": 29,
+  "gmm_params": {
+    "covariance_type": "full",
+    "init_params": "kmeans",
+    "max_iter": 300,
+    "means_init": null,
+    "n_components": 4,
+    "n_init": 10,
+    "precisions_init": null,
+    "random_state": 42,
+    "reg_covar": 1e-06,
+    "tol": 0.001,
+    "verbose": 0,
+    "verbose_interval": 10,
+    "warm_start": false,
+    "weights_init": null
+  }
+}

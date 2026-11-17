@@ -1,0 +1,18 @@
+{
+  "experiment": "A04-GMM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "log_cols": [],
+  "scaler": "StandardScaler",
+  "pca_variance": 0.95,
+  "n_components": 3,
+  "pca_variance_kept": 0.9999999999999999,
+  "covariance_type": "full",
+  "k": 5,
+  "bic": 718.8843782778962,
+  "silhouette": 0.13492009617847658,
+  "dbi": 1.9632944017272596
+}

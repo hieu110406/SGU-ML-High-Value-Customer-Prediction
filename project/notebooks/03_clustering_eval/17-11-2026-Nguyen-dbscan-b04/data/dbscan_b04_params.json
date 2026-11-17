@@ -1,0 +1,21 @@
+{
+  "experiment": "B04-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": "log1p",
+  "scaler": "MinMaxScaler",
+  "pca_variance": 0.9,
+  "n_components": 2,
+  "pca_variance_kept": 0.9697491484189803,
+  "eps": 0.112,
+  "min_samples": 4,
+  "eps_scale_vs_standard": 0.16,
+  "n_clusters": 2,
+  "noise_pct": 0.07,
+  "silhouette_non_noise": 0.6001,
+  "dbi_non_noise": 0.3357,
+  "ari_vs_b01_selected": 0.7487
+}

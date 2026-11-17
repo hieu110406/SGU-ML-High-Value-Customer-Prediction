@@ -1,0 +1,33 @@
+{
+  "experiment": "B02-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "log1p_features": [
+    "Frequency",
+    "Monetary"
+  ],
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 2,
+  "pca_variance_kept": 0.9380578041406961,
+  "k": 3,
+  "n_customers": 4327,
+  "silhouette": 0.4623,
+  "dbi": 0.727,
+  "chi": 5378.2,
+  "inertia": 3491.5,
+  "kmeans_params": {
+    "algorithm": "lloyd",
+    "copy_x": true,
+    "init": "k-means++",
+    "max_iter": 300,
+    "n_clusters": 3,
+    "n_init": 20,
+    "random_state": 42,
+    "tol": 0.0001,
+    "verbose": 0
+  }
+}

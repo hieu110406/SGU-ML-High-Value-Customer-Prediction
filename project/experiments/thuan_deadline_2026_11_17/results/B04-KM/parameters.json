@@ -1,0 +1,133 @@
+{
+  "experiment": "B04-KM",
+  "assignee": "Thuận",
+  "deadline_utc": "2026-11-17T21:00:00.000Z",
+  "status": "completed",
+  "actual_model": "KMeans",
+  "customers": 4327,
+  "preprocessing": {
+    "configuration": "B04",
+    "transform": "log_all",
+    "scaler": "MinMaxScaler",
+    "pca_requested": 0.9,
+    "model_input_dimensions": 2,
+    "pca_explained_variance_ratio": [
+      0.790102363889695,
+      0.17964678452928523
+    ],
+    "pca_explained_variance_total": 0.9697491484189802,
+    "pca_components": [
+      [
+        0.8736496461356037,
+        -0.40243547643542277,
+        -0.273462946508898
+      ],
+      [
+        0.48566302989491716,
+        0.6872528575683081,
+        0.5401989736731121
+      ]
+    ]
+  },
+  "selected": {
+    "k": 2,
+    "n_clusters": 2,
+    "noise_pct": 0.0,
+    "smallest_cluster": 1873,
+    "largest_cluster_pct_all": 56.71365842385024,
+    "silhouette": 0.46679316827833844,
+    "dbi": 0.8083928717921224,
+    "chi": 5413.424998024571,
+    "warnings": "",
+    "inertia": 179.7919096013483,
+    "eligible": true,
+    "selected": true
+  },
+  "model_parameters": {
+    "algorithm": "lloyd",
+    "copy_x": true,
+    "init": "k-means++",
+    "max_iter": 300,
+    "n_clusters": 2,
+    "n_init": 20,
+    "random_state": 42,
+    "tol": 0.0001,
+    "verbose": 0
+  },
+  "raw_sha256": "43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d",
+  "evaluation_space": "actual model input; DBSCAN excludes noise for internal metrics",
+  "comparison": {
+    "parent_configuration": "B01",
+    "purpose": "fixed-parameter preprocessing diagnostic, not a tuned parent experiment",
+    "target_dimensions": 2,
+    "parent_dimensions": 2,
+    "ari": 0.5156821117967471,
+    "target_common_rfm_scores": {
+      "n_clusters": 2,
+      "noise_pct": 0.0,
+      "smallest_cluster": 1873,
+      "largest_cluster_pct_all": 56.71365842385024,
+      "silhouette": 0.31897836991328704,
+      "dbi": 1.1520347509944373,
+      "chi": 1042.3843675896262
+    },
+    "parent_common_rfm_scores": {
+      "n_clusters": 2,
+      "noise_pct": 0.0,
+      "smallest_cluster": 1660,
+      "largest_cluster_pct_all": 61.636237577998614,
+      "silhouette": 0.27465798425214927,
+      "dbi": 1.2788561110743357,
+      "chi": 888.6767173509069
+    },
+    "parent_input_scores": {
+      "n_clusters": 2,
+      "noise_pct": 0.0,
+      "smallest_cluster": 1660,
+      "largest_cluster_pct_all": 61.636237577998614,
+      "silhouette": 0.46389778376046925,
+      "dbi": 0.8202790185535682,
+      "chi": 4985.948976631496
+    },
+    "parent_preprocessing": {
+      "configuration": "B01",
+      "transform": "log_all",
+      "scaler": "StandardScaler",
+      "pca_requested": 0.9,
+      "model_input_dimensions": 2,
+      "pca_explained_variance_ratio": [
+        0.7536055254303048,
+        0.18645519109298986
+      ],
+      "pca_explained_variance_total": 0.9400607165232946,
+      "pca_components": [
+        [
+          -0.5120539843512532,
+          0.6173473721487195,
+          0.597229385756492
+        ],
+        [
+          0.8504997455812195,
+          0.2670935394022497,
+          0.4531128159474855
+        ]
+      ]
+    },
+    "same_distance_geometry": false
+  },
+  "all_customers_common_space_scores": {
+    "n_clusters": 2,
+    "noise_pct": 0.0,
+    "smallest_cluster": 1873,
+    "largest_cluster_pct_all": 56.71365842385024,
+    "silhouette": 0.31897836991328704,
+    "dbi": 1.1520347509944373,
+    "chi": 1042.3843675896262
+  },
+  "limitations": [
+    "Exploratory clustering, not future value prediction; Monetary is historical sales, not profit.",
+    "No ground-truth labels or held-out predictive evaluation.",
+    "Internal scores from different feature spaces and DBSCAN subsets are not directly comparable.",
+    "The cleaning policy reproduces the shared group RFM; it is not a newly approved official policy."
+  ]
+}

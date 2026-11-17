@@ -1,0 +1,18 @@
+{
+  "experiment": "A04-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "scaler": "StandardScaler",
+  "pca_variance": 0.95,
+  "n_components": 3,
+  "eps": 1.5,
+  "min_samples": 4,
+  "n_clusters": 3,
+  "noise_pct": 0.42,
+  "silhouette_non_noise": 0.8177,
+  "dbi_non_noise": 0.4046,
+  "equivalent_to": "A01-DB (PCA 90% và 95% đều giữ 3/3 PC; 54/54 cấu hình ARI = 1.0)"
+}

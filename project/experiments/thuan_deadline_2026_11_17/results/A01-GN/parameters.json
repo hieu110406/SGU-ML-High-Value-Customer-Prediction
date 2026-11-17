@@ -1,0 +1,122 @@
+{
+  "experiment": "A01-GN",
+  "assignee": "Thuận",
+  "deadline_utc": "2026-11-17T21:00:00.000Z",
+  "status": "completed",
+  "actual_model": "GNNClustering",
+  "customers": 4327,
+  "preprocessing": {
+    "configuration": "A01",
+    "transform": "none",
+    "scaler": "StandardScaler",
+    "pca_requested": 0.9,
+    "model_input_dimensions": 3,
+    "pca_explained_variance_ratio": [
+      0.5638240337173058,
+      0.30163072566982435,
+      0.13454524061286977
+    ],
+    "pca_explained_variance_total": 1.0,
+    "pca_components": [
+      [
+        -0.37402340703988635,
+        0.6748844371544975,
+        0.6361112225648374
+      ],
+      [
+        0.9112201331059055,
+        0.13978679633999763,
+        0.3874758322675827
+      ],
+      [
+        0.17258145905262023,
+        0.7245623838260283,
+        -0.6672518204813022
+      ]
+    ]
+  },
+  "selected": {
+    "k": 6,
+    "n_clusters": 6,
+    "noise_pct": 0.0,
+    "smallest_cluster": 475,
+    "largest_cluster_pct_all": 22.14005084354056,
+    "silhouette": 0.3838063632789295,
+    "dbi": 1.010149246351215,
+    "chi": 1476.8095997504076,
+    "inertia": 3969.814353053081,
+    "eligible": true,
+    "selected": true
+  },
+  "model_parameters": {
+    "embedding_dim": 8,
+    "hidden_dim": 32,
+    "learning_rate": 0.01,
+    "max_epochs": 200,
+    "n_clusters": 6,
+    "neighbors": 15,
+    "patience": 30,
+    "random_state": 42,
+    "weight_decay": 0.0001
+  },
+  "raw_sha256": "43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d",
+  "evaluation_space": "learned GNN embeddings; K-Means readout, k selected by embedding Silhouette with minimum cluster size 1%",
+  "comparison": null,
+  "all_customers_common_space_scores": {
+    "n_clusters": 6,
+    "noise_pct": 0.0,
+    "smallest_cluster": 475,
+    "largest_cluster_pct_all": 22.14005084354056,
+    "silhouette": 0.26663531973910437,
+    "dbi": 1.0167652091896437,
+    "chi": 703.563940425087
+  },
+  "gnn_training": {
+    "architecture": "GCN(input,32)-ReLU-GCN(32,8); inner-product edge decoder",
+    "graph": "symmetrized union 15-nearest-neighbor Euclidean graph from PCA/model input",
+    "message_passing": "D^-1/2 (A_train + I) D^-1/2; validation/test positives removed",
+    "train_positive_edges": 32096,
+    "validation_positive_edges": 4011,
+    "test_positive_edges": 4011,
+    "epochs_run": 200,
+    "best_epoch": 198,
+    "initial_validation_bce": 0.6883407831192017,
+    "best_validation_bce": 0.4687439203262329,
+    "initial_validation_diagnostic": {
+      "roc_auc": 0.601007600576848,
+      "average_precision": 0.6243942937616715
+    },
+    "validation_link_metrics": {
+      "roc_auc": 0.9486231176406492,
+      "average_precision": 0.9257535135510753
+    },
+    "test_link_metrics": {
+      "roc_auc": 0.9501497098387065,
+      "average_precision": 0.9273072686912212
+    },
+    "test_usage": "evaluated once after validation checkpoint selection; never used for training or cluster-k selection",
+    "negative_sampling": "1:1 uniform non-edges; excludes all known positive edges and reserved validation/test negatives",
+    "torch_version": "2.8.0+cpu",
+    "device": "cpu",
+    "seed": 42
+  },
+  "embedding_dimensions": 8,
+  "preprocessed_input_scores": {
+    "n_clusters": 6,
+    "noise_pct": 0.0,
+    "smallest_cluster": 475,
+    "largest_cluster_pct_all": 22.14005084354056,
+    "silhouette": 0.26663531973910454,
+    "dbi": 1.0167652091896404,
+    "chi": 703.5639404250892
+  },
+  "limitations": [
+    "Exploratory clustering, not future value prediction; Monetary is historical sales, not profit.",
+    "No ground-truth labels or held-out predictive evaluation.",
+    "Internal scores from different feature spaces and DBSCAN subsets are not directly comparable.",
+    "The cleaning policy reproduces the shared group RFM; it is not a newly approved official policy.",
+    "Transductive GNN: graph/embeddings apply to the fitted customers and their original order; unseen nodes require graph reconstruction and retraining.",
+    "Held-out link prediction evaluates reconstruction of an RFM-derived graph, not business outcomes, customer value prediction, or segmentation ground truth.",
+    "Only one fixed random seed and one GNN architecture are evaluated; graph and architecture choices are explicit implementation assumptions."
+  ]
+}

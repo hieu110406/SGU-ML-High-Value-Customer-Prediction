@@ -1,0 +1,62 @@
+{
+  "raw_path": "data/raw/Online Retail.xlsx",
+  "raw_sha256": "43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d",
+  "raw_rows": 541909,
+  "clean_rows": 390987,
+  "customers": 4327,
+  "reference_date": "2011-12-10",
+  "reference_rfm_sha256": "103b2fbb7078c399179117fc4d8ebc08a0f85eac158671f488d2f6f04cd905a1",
+  "rfm_checks": [
+    {
+      "feature": "Recency",
+      "max_abs_error": 0.0,
+      "mismatched_customers": 0
+    },
+    {
+      "feature": "Frequency",
+      "max_abs_error": 0.0,
+      "mismatched_customers": 0
+    },
+    {
+      "feature": "Monetary",
+      "max_abs_error": 3.637978807091713e-12,
+      "mismatched_customers": 0
+    }
+  ],
+  "outlier_bounds": [
+    {
+      "feature": "Quantity",
+      "space": "log1p",
+      "q1": 0.6931471805599453,
+      "q3": 2.5649493574615367,
+      "lower": -4.922259350144829,
+      "upper": 8.18035588816631
+    },
+    {
+      "feature": "UnitPrice",
+      "space": "log1p",
+      "q1": 0.8109302162163288,
+      "q3": 1.6351056591826783,
+      "lower": -1.66159611268272,
+      "upper": 4.107631988081727
+    }
+  ],
+  "special_stock_codes": [
+    "ADJUST",
+    "ADJUST2",
+    "AMAZONFEE",
+    "B",
+    "BANK CHARGES",
+    "C2",
+    "C3",
+    "CRUK",
+    "D",
+    "DOT",
+    "M",
+    "POST",
+    "S",
+    "TEST001",
+    "TEST002"
+  ],
+  "note": "Experimental reproduction of the group RFM, not an official cleaning policy."
+}

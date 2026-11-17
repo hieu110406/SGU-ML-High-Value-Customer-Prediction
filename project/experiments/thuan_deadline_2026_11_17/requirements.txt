@@ -1,0 +1,12 @@
+# Python 3.12; exact versions used for this delivery, independent of the root requirements.
+numpy==2.3.5
+pandas==2.2.3
+scikit-learn==1.8.0
+scipy==1.17.0
+matplotlib==3.10.8
+openpyxl==3.1.5
+joblib==1.5.3
+threadpoolctl==3.6.0
+
+# Chỉ cần cho 3 thí nghiệm GN (A01-GN, A03-GN, B03-GN):
+# pip install --extra-index-url https://download.pytorch.org/whl/cpu torch==2.8.0+cpu

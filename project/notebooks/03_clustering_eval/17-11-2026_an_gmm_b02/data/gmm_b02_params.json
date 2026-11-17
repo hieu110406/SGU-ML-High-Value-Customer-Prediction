@@ -1,0 +1,22 @@
+{
+  "experiment": "B02-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "log_cols": [
+    "Frequency",
+    "Monetary"
+  ],
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 2,
+  "pca_variance_kept": 0.9380578041406961,
+  "covariance_type": "full",
+  "k": 6,
+  "bic": 20417.87655241212,
+  "silhouette": 0.10406571030955832,
+  "dbi": 2.6059961124436746,
+  "ari_vs_b01_gn": 0.4540888162668213
+}

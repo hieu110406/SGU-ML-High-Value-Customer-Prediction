@@ -1,0 +1,59 @@
+{
+  "parent_configuration": "B01",
+  "purpose": "fixed-parameter preprocessing diagnostic, not a tuned parent experiment",
+  "target_dimensions": 2,
+  "parent_dimensions": 2,
+  "ari": 0.777571861189575,
+  "target_common_rfm_scores": {
+    "n_clusters": 10,
+    "noise_pct": 0.0,
+    "smallest_cluster": 238,
+    "largest_cluster_pct_all": 14.143748555581235,
+    "silhouette": 0.002245555578232349,
+    "dbi": 1.8662939017620885,
+    "chi": 400.70775033849276
+  },
+  "parent_common_rfm_scores": {
+    "n_clusters": 10,
+    "noise_pct": 0.0,
+    "smallest_cluster": 265,
+    "largest_cluster_pct_all": 14.444187658886063,
+    "silhouette": -0.0067650438217739,
+    "dbi": 2.1675283838120043,
+    "chi": 432.5028050313084
+  },
+  "parent_input_scores": {
+    "n_clusters": 10,
+    "noise_pct": 0.0,
+    "smallest_cluster": 265,
+    "largest_cluster_pct_all": 14.444187658886063,
+    "silhouette": 0.28827130991004285,
+    "dbi": 1.075769444117844,
+    "chi": 2871.4811310439
+  },
+  "parent_preprocessing": {
+    "configuration": "B01",
+    "transform": "log_all",
+    "scaler": "StandardScaler",
+    "pca_requested": 0.9,
+    "model_input_dimensions": 2,
+    "pca_explained_variance_ratio": [
+      0.7536055254303048,
+      0.18645519109298986
+    ],
+    "pca_explained_variance_total": 0.9400607165232946,
+    "pca_components": [
+      [
+        -0.5120539843512532,
+        0.6173473721487195,
+        0.597229385756492
+      ],
+      [
+        0.8504997455812195,
+        0.2670935394022497,
+        0.4531128159474855
+      ]
+    ]
+  },
+  "same_distance_geometry": false
+}

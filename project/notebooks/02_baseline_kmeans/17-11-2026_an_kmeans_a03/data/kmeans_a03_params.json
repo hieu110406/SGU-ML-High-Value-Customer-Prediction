@@ -1,0 +1,16 @@
+{
+  "experiment": "A03-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "scaler": "StandardScaler",
+  "pca_n_components": 2,
+  "pca_variance_kept": 0.8654547593871302,
+  "k": 2,
+  "silhouette": 0.8952,
+  "dbi": 0.5119,
+  "chi": 2418.6,
+  "inertia": 7205.2
+}

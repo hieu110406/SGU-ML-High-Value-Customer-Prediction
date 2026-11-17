@@ -1,0 +1,180 @@
+{
+  "experiment": "A03-GN",
+  "assignee": "Thuận",
+  "deadline_utc": "2026-11-17T21:00:00.000Z",
+  "status": "completed",
+  "actual_model": "GNNClustering",
+  "customers": 4327,
+  "preprocessing": {
+    "configuration": "A03",
+    "transform": "none",
+    "scaler": "StandardScaler",
+    "pca_requested": 2,
+    "model_input_dimensions": 2,
+    "pca_explained_variance_ratio": [
+      0.5638240337173058,
+      0.30163072566982435
+    ],
+    "pca_explained_variance_total": 0.8654547593871302,
+    "pca_components": [
+      [
+        -0.37402340703988635,
+        0.6748844371544975,
+        0.6361112225648374
+      ],
+      [
+        0.9112201331059055,
+        0.13978679633999763,
+        0.3874758322675827
+      ]
+    ]
+  },
+  "selected": {
+    "k": 6,
+    "n_clusters": 6,
+    "noise_pct": 0.0,
+    "smallest_cluster": 513,
+    "largest_cluster_pct_all": 23.22625375548879,
+    "silhouette": 0.39703641744414153,
+    "dbi": 0.8646403444214789,
+    "chi": 1691.1572006504693,
+    "inertia": 3518.8970441439537,
+    "eligible": true,
+    "selected": true
+  },
+  "model_parameters": {
+    "embedding_dim": 8,
+    "hidden_dim": 32,
+    "learning_rate": 0.01,
+    "max_epochs": 200,
+    "n_clusters": 6,
+    "neighbors": 15,
+    "patience": 30,
+    "random_state": 42,
+    "weight_decay": 0.0001
+  },
+  "raw_sha256": "43465a06f2ccf7c8b5bd2892bc7defb52f97487934fe93b16ae4c3936424676d",
+  "evaluation_space": "learned GNN embeddings; K-Means readout, k selected by embedding Silhouette with minimum cluster size 1%",
+  "comparison": {
+    "parent_configuration": "A01",
+    "purpose": "fixed-parameter preprocessing diagnostic, not a tuned parent experiment",
+    "target_dimensions": 2,
+    "parent_dimensions": 3,
+    "ari": 0.8013379660066936,
+    "target_common_rfm_scores": {
+      "n_clusters": 6,
+      "noise_pct": 0.0,
+      "smallest_cluster": 513,
+      "largest_cluster_pct_all": 23.22625375548879,
+      "silhouette": 0.25489644681311074,
+      "dbi": 1.1081672035249943,
+      "chi": 558.9720144170914
+    },
+    "parent_common_rfm_scores": {
+      "n_clusters": 6,
+      "noise_pct": 0.0,
+      "smallest_cluster": 475,
+      "largest_cluster_pct_all": 22.14005084354056,
+      "silhouette": 0.26663531973910437,
+      "dbi": 1.0167652091896437,
+      "chi": 703.563940425087
+    },
+    "parent_input_scores": {
+      "n_clusters": 6,
+      "noise_pct": 0.0,
+      "smallest_cluster": 475,
+      "largest_cluster_pct_all": 22.14005084354056,
+      "silhouette": 0.26663531973910454,
+      "dbi": 1.0167652091896404,
+      "chi": 703.5639404250892
+    },
+    "parent_preprocessing": {
+      "configuration": "A01",
+      "transform": "none",
+      "scaler": "StandardScaler",
+      "pca_requested": 0.9,
+      "model_input_dimensions": 3,
+      "pca_explained_variance_ratio": [
+        0.5638240337173058,
+        0.30163072566982435,
+        0.13454524061286977
+      ],
+      "pca_explained_variance_total": 1.0,
+      "pca_components": [
+        [
+          -0.37402340703988635,
+          0.6748844371544975,
+          0.6361112225648374
+        ],
+        [
+          0.9112201331059055,
+          0.13978679633999763,
+          0.3874758322675827
+        ],
+        [
+          0.17258145905262023,
+          0.7245623838260283,
+          -0.6672518204813022
+        ]
+      ]
+    },
+    "same_distance_geometry": false
+  },
+  "all_customers_common_space_scores": {
+    "n_clusters": 6,
+    "noise_pct": 0.0,
+    "smallest_cluster": 513,
+    "largest_cluster_pct_all": 23.22625375548879,
+    "silhouette": 0.25489644681311074,
+    "dbi": 1.1081672035249943,
+    "chi": 558.9720144170914
+  },
+  "gnn_training": {
+    "architecture": "GCN(input,32)-ReLU-GCN(32,8); inner-product edge decoder",
+    "graph": "symmetrized union 15-nearest-neighbor Euclidean graph from PCA/model input",
+    "message_passing": "D^-1/2 (A_train + I) D^-1/2; validation/test positives removed",
+    "train_positive_edges": 30659,
+    "validation_positive_edges": 3832,
+    "test_positive_edges": 3832,
+    "epochs_run": 200,
+    "best_epoch": 199,
+    "initial_validation_bce": 0.6602451205253601,
+    "best_validation_bce": 0.47894251346588135,
+    "initial_validation_diagnostic": {
+      "roc_auc": 0.7188716952288388,
+      "average_precision": 0.6853592729081581
+    },
+    "validation_link_metrics": {
+      "roc_auc": 0.941244188320745,
+      "average_precision": 0.9175114994061194
+    },
+    "test_link_metrics": {
+      "roc_auc": 0.9459416445840108,
+      "average_precision": 0.9253973752936511
+    },
+    "test_usage": "evaluated once after validation checkpoint selection; never used for training or cluster-k selection",
+    "negative_sampling": "1:1 uniform non-edges; excludes all known positive edges and reserved validation/test negatives",
+    "torch_version": "2.8.0+cpu",
+    "device": "cpu",
+    "seed": 42
+  },
+  "embedding_dimensions": 8,
+  "preprocessed_input_scores": {
+    "n_clusters": 6,
+    "noise_pct": 0.0,
+    "smallest_cluster": 513,
+    "largest_cluster_pct_all": 23.22625375548879,
+    "silhouette": 0.28475619045528217,
+    "dbi": 1.0348821520975646,
+    "chi": 676.0797475391478
+  },
+  "limitations": [
+    "Exploratory clustering, not future value prediction; Monetary is historical sales, not profit.",
+    "No ground-truth labels or held-out predictive evaluation.",
+    "Internal scores from different feature spaces and DBSCAN subsets are not directly comparable.",
+    "The cleaning policy reproduces the shared group RFM; it is not a newly approved official policy.",
+    "Transductive GNN: graph/embeddings apply to the fitted customers and their original order; unseen nodes require graph reconstruction and retraining.",
+    "Held-out link prediction evaluates reconstruction of an RFM-derived graph, not business outcomes, customer value prediction, or segmentation ground truth.",
+    "Only one fixed random seed and one GNN architecture are evaluated; graph and architecture choices are explicit implementation assumptions."
+  ]
+}

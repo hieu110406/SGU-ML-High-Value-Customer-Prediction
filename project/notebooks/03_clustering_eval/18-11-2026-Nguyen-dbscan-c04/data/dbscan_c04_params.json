@@ -1,0 +1,33 @@
+{
+  "experiment": "C04-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "QtyPerOrder",
+    "Tenure"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "QtyPerOrder": "avg_quantity_per_order",
+    "Tenure": "observed_span_days"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 4,
+  "pca_variance_kept": 0.9396302927016122,
+  "eps": 1.0,
+  "min_samples": 4,
+  "n_clusters": 3,
+  "noise_pct": 1.46,
+  "silhouette_non_noise": 0.2641,
+  "dbi_non_noise": 0.6479,
+  "configs_passing_rule": 2,
+  "ari_vs_c01": 0.767,
+  "ari_vs_c02": 0.755,
+  "ari_vs_c03": 0.549
+}

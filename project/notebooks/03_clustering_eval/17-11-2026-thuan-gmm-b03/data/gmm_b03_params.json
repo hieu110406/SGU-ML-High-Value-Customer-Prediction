@@ -1,0 +1,49 @@
+{
+  "experiment": "B03-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": "yeo-johnson(standardize=False)",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 2,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9334397011033898,
+  "covariance_type": "full",
+  "k": 4,
+  "bic": 24712.544545681158,
+  "aic": 24565.974061655987,
+  "silhouette": 0.35629082712408167,
+  "dbi": 0.8886731891394979,
+  "chi": 4109.759647379313,
+  "min_cluster": 820,
+  "converged": true,
+  "n_iter": 13,
+  "gmm_params": {
+    "covariance_type": "full",
+    "init_params": "kmeans",
+    "max_iter": 300,
+    "means_init": null,
+    "n_components": 4,
+    "n_init": 10,
+    "precisions_init": null,
+    "random_state": 42,
+    "reg_covar": 1e-06,
+    "tol": 0.001,
+    "verbose": 0,
+    "verbose_interval": 10,
+    "warm_start": false,
+    "weights_init": null
+  },
+  "ari_vs_parent_fixed_params": {
+    "parent": "B01",
+    "ari": 0.6138358099572676
+  },
+  "yeo_johnson_lambdas": {
+    "Recency": 0.12521671050228209,
+    "Frequency": -0.7703864033179515,
+    "Monetary": -0.0782529629749916
+  }
+}

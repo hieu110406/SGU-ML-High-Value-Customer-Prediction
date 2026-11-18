@@ -1,0 +1,39 @@
+{
+  "experiment": "C02-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "QtyPerOrder"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "QtyPerOrder": "avg_quantity_per_order"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 3,
+  "pca_variance_kept": 0.9089031771803235,
+  "k": 2,
+  "n_customers": 4327,
+  "silhouette": 0.3483,
+  "dbi": 1.0841,
+  "chi": 2954.2,
+  "inertia": 14020.5,
+  "r2_logQtyPerOrder_on_C01_features": 0.7199,
+  "kmeans_params": {
+    "algorithm": "lloyd",
+    "copy_x": true,
+    "init": "k-means++",
+    "max_iter": 300,
+    "n_clusters": 2,
+    "n_init": 20,
+    "random_state": 42,
+    "tol": 0.0001,
+    "verbose": 0
+  }
+}

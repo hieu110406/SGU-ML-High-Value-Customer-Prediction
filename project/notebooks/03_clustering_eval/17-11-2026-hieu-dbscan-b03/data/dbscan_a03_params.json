@@ -1,0 +1,18 @@
+{
+  "experiment": "A03-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "scaler": "StandardScaler",
+  "pca_mode": "fixed_n_components",
+  "n_components": 2,
+  "pca_explained_variance_ratio": 0.8654547593871302,
+  "eps": 1.5,
+  "min_samples": 10,
+  "n_clusters": 2,
+  "noise_pct": 0.32354980355904783,
+  "silhouette_non_noise": 0.8361989591137989,
+  "dbi_non_noise": 0.21457917083288103
+}

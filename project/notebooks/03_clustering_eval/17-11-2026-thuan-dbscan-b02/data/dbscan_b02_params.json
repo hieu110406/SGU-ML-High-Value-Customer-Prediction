@@ -1,0 +1,26 @@
+{
+  "experiment": "B02-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": "log1p (chỉ F, M)",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 2,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9380578041406961,
+  "eps": 0.5,
+  "min_samples": 8,
+  "n_clusters": 2,
+  "noise_pct": 0.3,
+  "largest_pct": 99.56,
+  "smallest": 6,
+  "silhouette_non_noise": 0.6411720918608328,
+  "dbi_non_noise": 0.27006823810112235,
+  "ari_vs_parent_fixed_params": {
+    "parent": "B01",
+    "ari": 0.5794008404360105
+  }
+}

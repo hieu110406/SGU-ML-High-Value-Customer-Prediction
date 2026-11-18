@@ -1,0 +1,17 @@
+{
+  "experiment": "A02-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "scaler": "StandardScaler",
+  "pca": null,
+  "covariance_type": "diag",
+  "k": 6,
+  "n_customers": 4327,
+  "bic": -11514.07537067146,
+  "silhouette": 0.02263807438968161,
+  "dbi": 1.8768840953568244,
+  "source_cross_check": "Thuận (14-11-2026-thuan-gmm-rfm/gmm.ipynb), cấu hình A"
+}

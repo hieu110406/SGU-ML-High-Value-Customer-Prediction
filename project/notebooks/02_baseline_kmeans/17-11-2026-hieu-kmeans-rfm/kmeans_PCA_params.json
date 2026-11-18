@@ -1,0 +1,35 @@
+{
+    "features": [
+        "Recency",
+        "Frequency",
+        "Monetary"
+    ],
+    "scaling": "StandardScaler",
+    "pca": {
+        "n_components": 3,
+        "variance_threshold": 0.9,
+        "explained_variance_ratio": [
+            0.5638240337173057,
+            0.3016307256698245,
+            0.13454524061286968
+        ]
+    },
+    "kmeans": {
+        "algorithm": "lloyd",
+        "copy_x": true,
+        "init": "k-means++",
+        "max_iter": 300,
+        "n_clusters": 2,
+        "n_init": 10,
+        "random_state": 42,
+        "tol": 0.0001,
+        "verbose": 0
+    },
+    "selection": "max Silhouette on X_pca among surveyed k",
+    "metrics": {
+        "Silhouette": 0.8993587821096044,
+        "DBI": 0.7274616155492135,
+        "CHI": 1947.5218339357018,
+        "Inertia": 8950.598576836375
+    }
+}

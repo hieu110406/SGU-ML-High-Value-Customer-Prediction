@@ -1,0 +1,24 @@
+{
+  "experiment": "B04-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": "log1p",
+  "scaler": "MinMaxScaler",
+  "pca": 0.9,
+  "n_components": 2,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9697491484189802,
+  "k": 2,
+  "silhouette": 0.46679316827833844,
+  "dbi": 0.8083928717921224,
+  "chi": 5413.424998024571,
+  "inertia": 179.791909601348,
+  "n_init": 20,
+  "ari_vs_parent_fixed_params": {
+    "parent": "B01",
+    "ari": 0.5156821117967471
+  }
+}

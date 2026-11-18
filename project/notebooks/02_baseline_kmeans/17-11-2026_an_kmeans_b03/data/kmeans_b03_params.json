@@ -1,0 +1,24 @@
+{
+  "experiment": "B03-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": "yeo-johnson(standardize=False)",
+  "lambdas": {
+    "Recency": 0.1252,
+    "Frequency": -0.7704,
+    "Monetary": -0.0783
+  },
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 2,
+  "pca_variance_kept": 0.9334397011070323,
+  "k": 2,
+  "silhouette": 0.4672,
+  "dbi": 0.7936,
+  "chi": 5614.6,
+  "ari_vs_b01_log1p_km": 0.7125761760710401,
+  "ari_vs_a03_km": 0.001967490770248942
+}

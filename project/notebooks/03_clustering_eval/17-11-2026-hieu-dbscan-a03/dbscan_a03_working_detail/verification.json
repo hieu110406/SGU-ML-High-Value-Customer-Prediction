@@ -1,0 +1,15 @@
+{
+  "output": "D:\\DOAN\\SGU-ML-High-Value-Customer-Prediction\\outputs\\dbscan_a03_working_detail\\Working_details_DBSCAN_A03.xlsx",
+  "sheets": [
+    "ketqua",
+    "tinhchinh",
+    "hosocum",
+    "nhatky"
+  ],
+  "customers": 4327,
+  "grid_rows": 54,
+  "eligible": 10,
+  "checked_formulas": 74,
+  "native_recalculation": false,
+  "source_features_sha256": "5a47029dd3b2c26a3aba1821139da9b3f46e8da8e03289ded7651ae91ccb14a8"
+}

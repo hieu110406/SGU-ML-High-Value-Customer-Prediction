@@ -1,0 +1,25 @@
+{
+  "experiment": "A02-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary"
+  ],
+  "transform": null,
+  "scaler": "StandardScaler",
+  "pca": null,
+  "n_components": 3,
+  "n_customers": 4327,
+  "eps": 1.5,
+  "min_samples": 4,
+  "n_clusters": 3,
+  "noise_pct": 0.42,
+  "largest_pct": 99.4,
+  "smallest": 4,
+  "silhouette_non_noise": 0.8177029258485679,
+  "dbi_non_noise": 0.40455148524808054,
+  "ari_vs_parent_fixed_params": {
+    "parent": "A01",
+    "ari": 1.0
+  }
+}

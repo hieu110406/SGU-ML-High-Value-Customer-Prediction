@@ -1,0 +1,6 @@
+,cap,customers_capped,customers_capped_pct,value_capped_pct
+Recency,,0,0.0,0.0
+Frequency,30.0,42,0.97,6.12
+Monetary,17279.06,44,1.02,21.62
+AOV,1894.54,44,1.02,4.45
+Diversity,353.74,44,1.02,3.5

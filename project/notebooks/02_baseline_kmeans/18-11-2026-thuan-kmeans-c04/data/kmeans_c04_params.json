@@ -1,0 +1,34 @@
+{
+  "experiment": "C04-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "QtyPerOrder",
+    "Tenure"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "QtyPerOrder": "avg_quantity_per_order",
+    "Tenure": "observed_span_days"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 4,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9396302927016121,
+  "k": 2,
+  "silhouette": 0.3513412021675317,
+  "dbi": 1.102351714516771,
+  "chi": 2932.310886680098,
+  "inertia": 16961.05703371898,
+  "n_init": 20,
+  "ari_vs_parent_fixed_params": {
+    "parent": "C01",
+    "ari": 0.7025536325694526
+  }
+}

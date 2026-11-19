@@ -1,0 +1,73 @@
+{
+  "experiment": "E03-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes"
+  },
+  "cap_percentile": 99,
+  "caps": {
+    "Recency": null,
+    "Frequency": 30.0,
+    "Monetary": 17279.057399999994,
+    "AOV": 1894.5414999999903,
+    "Diversity": 353.7399999999998
+  },
+  "customers_capped": 116,
+  "correlation_threshold": 0.95,
+  "dropped_features": [],
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 3,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9240906840888116,
+  "covariance_type": "full",
+  "k": 7,
+  "bic": 36888.95250944325,
+  "aic": 36449.241057367726,
+  "silhouette": 0.14164475085193878,
+  "dbi": 1.8112621035284562,
+  "chi": 1173.0006757191031,
+  "min_cluster": 341,
+  "converged": true,
+  "n_iter": 31,
+  "gmm_params": {
+    "covariance_type": "full",
+    "init_params": "kmeans",
+    "max_iter": 300,
+    "means_init": null,
+    "n_components": 7,
+    "n_init": 10,
+    "precisions_init": null,
+    "random_state": 42,
+    "reg_covar": 1e-06,
+    "tol": 0.001,
+    "verbose": 0,
+    "verbose_interval": 10,
+    "warm_start": false,
+    "weights_init": null
+  },
+  "parent_comparison": [
+    {
+      "so với": "E01",
+      "số feature": 5,
+      "số chiều": 3,
+      "cùng tập feature": true,
+      "ARI": 1.0
+    },
+    {
+      "so với": "D01",
+      "số feature": 5,
+      "số chiều": 3,
+      "cùng tập feature": true,
+      "ARI": 1.0
+    }
+  ]
+}

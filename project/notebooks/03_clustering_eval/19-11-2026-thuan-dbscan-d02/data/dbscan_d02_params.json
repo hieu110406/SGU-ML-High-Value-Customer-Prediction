@@ -1,0 +1,46 @@
+{
+  "experiment": "D02-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes"
+  },
+  "cap_percentile": 95,
+  "caps": {
+    "Recency": null,
+    "Frequency": 13.0,
+    "Monetary": 5698.423999999996,
+    "AOV": 909.4065657894733,
+    "Diversity": 204.0
+  },
+  "customers_capped": 527,
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 3,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9251088869976909,
+  "eps": 0.5,
+  "min_samples": 6,
+  "n_clusters": 3,
+  "noise_pct": 1.96,
+  "largest_pct": 97.85,
+  "smallest": 4,
+  "silhouette_non_noise": 0.10364047072425454,
+  "dbi_non_noise": 0.6144719661294479,
+  "parent_comparison": [
+    {
+      "so với": "D01",
+      "số feature": 5,
+      "số chiều": 3,
+      "cùng tập feature": true,
+      "ARI": 0.7068
+    }
+  ]
+}

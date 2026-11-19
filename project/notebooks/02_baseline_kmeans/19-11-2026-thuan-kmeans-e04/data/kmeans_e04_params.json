@@ -1,0 +1,45 @@
+{
+  "experiment": "E04-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes"
+  },
+  "cap_percentile": 99,
+  "caps": {
+    "Recency": null,
+    "Frequency": 30.0,
+    "Monetary": 17279.057399999994,
+    "AOV": 1894.5414999999903,
+    "Diversity": 353.7399999999998
+  },
+  "customers_capped": 116,
+  "correlation_threshold": 0.9,
+  "dropped_features": [],
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca": null,
+  "n_components": 5,
+  "n_customers": 4327,
+  "k": 2,
+  "silhouette": 0.34864463966533515,
+  "dbi": 1.0934865327093226,
+  "chi": 3028.116805096619,
+  "inertia": 12725.413992639558,
+  "n_init": 20,
+  "parent_comparison": [
+    {
+      "so với": "E01",
+      "số feature": 5,
+      "số chiều": 3,
+      "cùng tập feature": true,
+      "ARI": 0.9972
+    }
+  ]
+}

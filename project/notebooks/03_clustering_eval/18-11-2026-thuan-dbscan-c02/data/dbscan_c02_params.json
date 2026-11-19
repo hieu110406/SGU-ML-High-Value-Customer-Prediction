@@ -1,0 +1,34 @@
+{
+  "experiment": "C02-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "QtyPerOrder"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "QtyPerOrder": "avg_quantity_per_order"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 3,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9089031771803235,
+  "eps": 0.7,
+  "min_samples": 4,
+  "n_clusters": 4,
+  "noise_pct": 1.39,
+  "largest_pct": 98.36,
+  "smallest": 3,
+  "silhouette_non_noise": 0.3848309331414809,
+  "dbi_non_noise": 0.4501585133075804,
+  "ari_vs_parent_fixed_params": {
+    "parent": "C01",
+    "ari": 0.7797445991371602
+  }
+}

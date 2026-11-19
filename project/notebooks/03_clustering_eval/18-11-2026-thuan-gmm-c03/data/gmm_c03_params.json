@@ -1,0 +1,52 @@
+{
+  "experiment": "C03-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "Tenure"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "Tenure": "observed_span_days"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca": 0.9,
+  "n_components": 4,
+  "n_customers": 4327,
+  "pca_variance_kept": 0.9591852207003011,
+  "covariance_type": "full",
+  "k": 7,
+  "bic": 26346.68348890813,
+  "aic": 25683.92999592474,
+  "silhouette": 0.10260193187189376,
+  "dbi": 2.43955703640902,
+  "chi": 785.0097674615957,
+  "min_cluster": 45,
+  "converged": true,
+  "n_iter": 36,
+  "gmm_params": {
+    "covariance_type": "full",
+    "init_params": "kmeans",
+    "max_iter": 300,
+    "means_init": null,
+    "n_components": 7,
+    "n_init": 10,
+    "precisions_init": null,
+    "random_state": 42,
+    "reg_covar": 1e-06,
+    "tol": 0.001,
+    "verbose": 0,
+    "verbose_interval": 10,
+    "warm_start": false,
+    "weights_init": null
+  },
+  "ari_vs_parent_fixed_params": {
+    "parent": "C01",
+    "ari": 0.3938855924556255
+  }
+}

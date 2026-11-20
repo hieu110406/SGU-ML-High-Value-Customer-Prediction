@@ -1,0 +1,27 @@
+{
+  "experiment": "C03-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "Tenure"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "Tenure": "observed_span_days"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 4,
+  "pca_variance_kept": 0.9591852207003013,
+  "k": 2,
+  "silhouette": 0.3764,
+  "dbi": 1.0275,
+  "chi": 3430.3,
+  "ari_vs_c01_km": 0.6493464230790836,
+  "ari_vs_b03_km": 0.7291517721685165
+}

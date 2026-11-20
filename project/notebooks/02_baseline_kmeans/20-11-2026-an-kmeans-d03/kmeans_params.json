@@ -1,0 +1,55 @@
+{
+  "experiment": "D03-KM",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes"
+  },
+  "cap_percentile": 99.5,
+  "cap_features": [
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "caps": {
+    "Recency": null,
+    "Frequency": 42.10999999999967,
+    "Monetary": 37139.2025,
+    "AOV": 2713.961546666651,
+    "Diversity": 440.3699999999999
+  },
+  "customers_capped": 53,
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 3,
+  "pca_variance_kept": 0.9236194895972558,
+  "k": 2,
+  "n_customers": 4327,
+  "silhouette": 0.3762,
+  "dbi": 1.0122,
+  "chi": 3435.2,
+  "inertia": 11136.9,
+  "ari_vs_d01": 0.9899,
+  "ari_vs_d02": 0.9318,
+  "ari_vs_c01": 0.9945,
+  "customers_changed_vs_d01": 11,
+  "kmeans_params": {
+    "algorithm": "lloyd",
+    "copy_x": true,
+    "init": "k-means++",
+    "max_iter": 300,
+    "n_clusters": 2,
+    "n_init": 20,
+    "random_state": 42,
+    "tol": 0.0001,
+    "verbose": 0
+  }
+}

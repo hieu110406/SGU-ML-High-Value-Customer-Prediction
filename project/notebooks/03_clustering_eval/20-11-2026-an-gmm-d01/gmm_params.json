@@ -1,0 +1,63 @@
+{
+  "experiment": "D01-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes"
+  },
+  "cap_percentile": 99,
+  "cap_features": [
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "caps": {
+    "Recency": null,
+    "Frequency": 30.0,
+    "Monetary": 17279.057399999994,
+    "AOV": 1894.5414999999903,
+    "Diversity": 353.7399999999998
+  },
+  "customers_capped": 116,
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 3,
+  "pca_variance_kept": 0.9240906840888118,
+  "covariance_type": "full",
+  "k": 7,
+  "bic": 36888.95250944324,
+  "aic": 36449.24105736772,
+  "silhouette": 0.14164475085193878,
+  "dbi": 1.8112621035284562,
+  "chi": 1173.0006757191031,
+  "min_cluster": 341,
+  "converged": true,
+  "n_iter": 31,
+  "n_customers": 4327,
+  "equivalent_to": "E03-GN (Thuận): cùng cap P99, không loại biến nào; E01-GN tương đương theo cùng lý do",
+  "ari_vs_c01": 0.4914,
+  "gmm_params": {
+    "covariance_type": "full",
+    "init_params": "kmeans",
+    "max_iter": 300,
+    "means_init": null,
+    "n_components": 7,
+    "n_init": 10,
+    "precisions_init": null,
+    "random_state": 42,
+    "reg_covar": 1e-06,
+    "tol": 0.001,
+    "verbose": 0,
+    "verbose_interval": 10,
+    "warm_start": false,
+    "weights_init": null
+  }
+}

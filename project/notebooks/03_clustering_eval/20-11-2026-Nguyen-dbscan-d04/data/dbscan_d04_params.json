@@ -1,0 +1,38 @@
+{
+  "experiment": "D04-DB",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes"
+  },
+  "cap_percentile": 99,
+  "caps": {
+    "Recency": null,
+    "Frequency": 30.0,
+    "Monetary": 17279.057399999994,
+    "AOV": 1894.5414999999903,
+    "Diversity": 353.7399999999998
+  },
+  "customers_capped": 116,
+  "transform": "log1p",
+  "scaler": "RobustScaler(quantile_range=(25, 75))",
+  "pca_variance": 0.9,
+  "n_components": 3,
+  "pca_variance_kept": 0.9286503116321033,
+  "eps": 0.4,
+  "min_samples": 4,
+  "eps_scale_vs_standard": 0.7433,
+  "n_clusters": 2,
+  "noise_pct": 1.29,
+  "silhouette_non_noise": 0.4469174483704642,
+  "dbi_non_noise": 0.47011494575569884,
+  "configs_passing_rule": 2,
+  "ari_vs_d01_selected": 0.4881,
+  "equivalent_note": "D01-DB dựng lại trùng E02-DB (Thuận); E01-DB, E03-DB tương đương D01-DB"
+}

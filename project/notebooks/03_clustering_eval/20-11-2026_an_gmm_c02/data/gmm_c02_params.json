@@ -1,0 +1,27 @@
+{
+  "experiment": "C02-GN",
+  "features": [
+    "Recency",
+    "Frequency",
+    "Monetary",
+    "AOV",
+    "Diversity",
+    "QtyPerOrder"
+  ],
+  "feature_sources": {
+    "AOV": "avg_order_value",
+    "Diversity": "n_stock_codes",
+    "QtyPerOrder": "avg_quantity_per_order"
+  },
+  "transform": "log1p",
+  "scaler": "StandardScaler",
+  "pca_variance": 0.9,
+  "n_components": 3,
+  "pca_variance_kept": 0.9089031771803235,
+  "covariance_type": "full",
+  "k": 7,
+  "bic": 39264.103373911166,
+  "silhouette": 0.10261557265161762,
+  "dbi": 1.9832038492037933,
+  "ari_vs_c01_gmm": 0.5424008038460895
+}

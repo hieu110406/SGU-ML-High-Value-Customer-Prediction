@@ -1,0 +1,5 @@
+cd project
+//cài lại nếu còn thiếu
+pip install -r requirements.txt
+//chạy app
+streamlit run app/streamlit_app.py
